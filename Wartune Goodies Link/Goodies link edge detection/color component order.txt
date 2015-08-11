@@ -1,0 +1,24 @@
+red image:
+-1
+0
+0
+-1
+
+green image:
+0
+-1
+0
+-1
+
+blue image:
+0
+0
+-1
+-1
+
+Obtained by taking a screenshot containing a large region of red, green, or blue and inspecting a section of the resulting byte array that was mainly 0 and -1.
+The bytes were ensured to be at the start of a pixel by verifying the index is divisible by 4 (because each pixel takes 4 bytes)
+
+By analyzing the pixel values, -1 (255 unsigned) is the fourth byte per pixel. Therefore the alpha component comes fourth.
+
+The remaining nonzero byte for each image indicate the proper component: Red comes first, then green, then blue.
