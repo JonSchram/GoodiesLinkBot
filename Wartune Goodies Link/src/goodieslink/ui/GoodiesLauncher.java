@@ -1,7 +1,5 @@
 package goodieslink.ui;
 
-import goodieslink.processing.image.CannyEdgeDetector;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -12,11 +10,17 @@ import javax.imageio.ImageIO;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+
+import goodieslink.processing.image.CannyEdgeDetector;
 
 public class GoodiesLauncher {
 	public static void main(String[] args) {
+		// thanks to
+		// https://github.com/PatternConsulting/opencv
+		// for pointing out that using this library requires this extra call
+		nu.pattern.OpenCV.loadShared();
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		try {
 			String imageFilename = "Goodies link edge detection/Screenshot from 2015-04-18 16:36:12.png";
@@ -50,8 +54,7 @@ public class GoodiesLauncher {
 			// ImagePreview edgeWindow = new ImagePreview(edgeImage);
 			// edgeWindow.show();
 
-			Mat imageMat = Imgcodecs.imread(imageFilename,
-					Imgcodecs.IMREAD_ANYCOLOR);
+			Mat imageMat = Highgui.imread(imageFilename, Highgui.IMREAD_ANYCOLOR);
 
 			Imgproc.blur(imageMat, imageMat, new Size(1, 1));
 			Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_RGBA2GRAY);
@@ -62,9 +65,8 @@ public class GoodiesLauncher {
 			startOpenCV = System.nanoTime();
 			Imgproc.Canny(imageMat, imageMat, 50, 150, 3, false);
 			endOpenCV = System.nanoTime();
-			System.out.println("OpenCV : " + (endOpenCV - startOpenCV)
-					/ 1000000. + " ms");
-			Imgcodecs.imwrite("edge image OpenCV.png", imageMat);
+			System.out.println("OpenCV : " + (endOpenCV - startOpenCV) / 1000000. + " ms");
+			Highgui.imwrite("edge image OpenCV.png", imageMat);
 			BufferedImage openCvImage = toBufferedImage(imageMat);
 			ImagePreview cvWindow = new ImagePreview(openCvImage);
 
@@ -95,8 +97,7 @@ public class GoodiesLauncher {
 		byte[] b = new byte[bufferSize];
 		m.get(0, 0, b); // get all the pixels
 		BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster()
-				.getDataBuffer()).getData();
+		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		System.arraycopy(b, 0, targetPixels, 0, b.length);
 		return image;
 

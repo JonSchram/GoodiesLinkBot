@@ -1,0 +1,15 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.jonschram</groupId>
+  <artifactId>Wartune-Goodies-Link-bot</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Wartune Goodies Link Bot</name>
+  <description>Automates the playing of the Wartune minigame "Goodies link" using screenshots, simulated mouse clicks, and image processing algorithms. Does not require tampering with game files.</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>nu.pattern</groupId>
+  		<artifactId>opencv</artifactId>
+  		<version>2.4.9-7</version>
+  	</dependency>
+  </dependencies>
+</project>
