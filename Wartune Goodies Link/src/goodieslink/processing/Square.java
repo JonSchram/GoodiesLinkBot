@@ -12,8 +12,8 @@ public class Square implements Shape {
 	private int x, y, sideLength;
 
 	public static double difference(Square s1, Square s2) {
-		return Math.sqrt(Math.pow(s1.x - s2.x, 2) + Math.pow(s1.y - s2.y, 2)
-				+ Math.pow(s1.sideLength - s2.sideLength, 2));
+		return Math
+				.sqrt(Math.pow(s1.x - s2.x, 2) + Math.pow(s1.y - s2.y, 2) + Math.pow(s1.sideLength - s2.sideLength, 2));
 	}
 
 	public static Square average(List<Square> squares) {
@@ -26,8 +26,7 @@ public class Square implements Shape {
 			sumSide = s.sideLength;
 		}
 		double scalar = 1.0 / squares.size();
-		return new Square((int) (sumX * scalar), (int) (sumY * scalar),
-				(int) (sumSide * scalar));
+		return new Square((int) (sumX * scalar), (int) (sumY * scalar), (int) (sumSide * scalar));
 	}
 
 	public Square(int x, int y, int sideLength) {
@@ -50,6 +49,14 @@ public class Square implements Shape {
 
 	public Point2D.Double getCenter() {
 		return new Point2D.Double(x + sideLength / 2.0, y + sideLength / 2.0);
+	}
+
+	public double getCenterY() {
+		return y + sideLength / 2.0;
+	}
+
+	public double getCenterX() {
+		return x + sideLength / 2.0;
 	}
 
 	public int getSideLength() {
@@ -93,10 +100,8 @@ public class Square implements Shape {
 
 	@Override
 	public boolean intersects(double x, double y, double w, double h) {
-		if (x < this.x && x + w > this.x || x < this.x + sideLength
-				&& x + w < this.x + sideLength) {
-			if (y < this.y && y + h > this.y || y < this.y + sideLength
-					&& y + h < this.y + sideLength) {
+		if (x < this.x && x + w > this.x || x < this.x + sideLength && x + w < this.x + sideLength) {
+			if (y < this.y && y + h > this.y || y < this.y + sideLength && y + h < this.y + sideLength) {
 				return true;
 			}
 		}
@@ -215,7 +220,6 @@ public class Square implements Shape {
 
 	@Override
 	public String toString() {
-		return "Square. Upper left: (" + x + ", " + y + "), side length: "
-				+ sideLength;
+		return "Square. Upper left: (" + x + ", " + y + "), side length: " + sideLength;
 	}
 }
