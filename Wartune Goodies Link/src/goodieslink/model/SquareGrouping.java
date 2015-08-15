@@ -41,7 +41,8 @@ public abstract class SquareGrouping implements Iterable<Square> {
 	/**
 	 * Returns the index of the specified square in the SquareGrouping, or -1 if
 	 * the square doesn't exist. List is sorted if it is not already, and the
-	 * search is, for now, a simple linear search
+	 * search is, for now, a simple linear search through the ArrayList's
+	 * indexOf() method
 	 * 
 	 * @param s
 	 * @return
@@ -52,4 +53,10 @@ public abstract class SquareGrouping implements Iterable<Square> {
 		}
 		return group.indexOf(s);
 	}
+
+	public boolean isSorted() {
+		return sorted;
+	}
+
+	public abstract double minSpacing();
 }

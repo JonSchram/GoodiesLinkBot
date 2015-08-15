@@ -3,6 +3,7 @@ package goodieslink.model;
 import goodieslink.processing.Square;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.attribute.GroupPrincipal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,18 +30,30 @@ public class GameBoard {
 		ArrayList<ColumnGroup> cols = new ArrayList<>();
 		getRowColumnList(rows, cols);
 
-		for (ColumnGroup col : cols) {
-			// presort the columns because these will be searched a lot
-			col.sort();
-		}
-		// don't sort rows ahead of time because that can be done at each
-		// iteration
-
 		for (RowGroup row : rows) {
 			row.sort();
-
+		}
+		for (ColumnGroup col : cols) {
+			col.sort();
 		}
 
+	}
+
+	private double findMinSpacing(ArrayList<SquareGrouping> squareGroups) {
+		Iterator<SquareGrouping> groupIterator = squareGroups.iterator();
+		if (groupIterator.hasNext()) {
+			double minSpacing = groupIterator.next().minSpacing();
+			while (groupIterator.hasNext()) {
+				SquareGrouping group = groupIterator.next();
+				double temp = group.minSpacing();
+				if (temp < minSpacing) {
+					minSpacing = temp;
+				}
+			}
+			return minSpacing;
+		} else {
+			return -1;
+		}
 	}
 
 	private void getRowColumnList(ArrayList<RowGroup> rows, ArrayList<ColumnGroup> cols) {

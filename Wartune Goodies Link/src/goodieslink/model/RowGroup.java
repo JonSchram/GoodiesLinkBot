@@ -2,6 +2,7 @@ package goodieslink.model;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 
 import goodieslink.processing.Square;
 
@@ -33,7 +34,6 @@ public class RowGroup extends SquareGrouping {
 		return squares;
 	}
 
-
 	@Override
 	public void add(Square s) {
 		super.add(s);
@@ -57,4 +57,27 @@ public class RowGroup extends SquareGrouping {
 		}
 	}
 
+	@Override
+	public double minSpacing() {
+		if (!isSorted()) {
+			sort();
+		}
+		Iterator<Square> squareIterator = iterator();
+		if (squareIterator.hasNext()) {
+			Square previous = squareIterator.next();
+			double minSpacing = -1;
+			boolean hasMin = false;
+			while (squareIterator.hasNext()) {
+				Square current = squareIterator.next();
+				double spacing = current.getCenterX() - previous.getCenterX();
+				if (spacing < minSpacing || !hasMin) {
+					minSpacing = spacing;
+				}
+				previous = current;
+			}
+			return minSpacing;
+		} else {
+			return -1;
+		}
+	}
 }
