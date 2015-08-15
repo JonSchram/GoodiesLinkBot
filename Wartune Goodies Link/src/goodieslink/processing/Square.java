@@ -222,4 +222,25 @@ public class Square implements Shape {
 	public String toString() {
 		return "Square. Upper left: (" + x + ", " + y + "), side length: " + sideLength;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		if (!(obj instanceof Square)) {
+			Square s2 = (Square) obj;
+			if (this.x == s2.x && this.y == s2.y && this.sideLength == s2.sideLength) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
 }

@@ -1,7 +1,7 @@
 package goodieslink.model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 import goodieslink.processing.Square;
 
@@ -24,8 +24,8 @@ public class ColumnGroup extends SquareGrouping {
 	}
 
 	@Override
-	public List<Square> getSorted() {
-		List<Square> squares = getList();
+	public ArrayList<Square> getSorted() {
+		ArrayList<Square> squares = getList();
 		squares.sort(new Comparator<Square>() {
 			@Override
 			public int compare(Square o1, Square o2) {

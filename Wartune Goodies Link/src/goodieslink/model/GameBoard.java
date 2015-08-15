@@ -28,8 +28,18 @@ public class GameBoard {
 		ArrayList<RowGroup> rows = new ArrayList<>();
 		ArrayList<ColumnGroup> cols = new ArrayList<>();
 		getRowColumnList(rows, cols);
-		
-		
+
+		for (ColumnGroup col : cols) {
+			// presort the columns because these will be searched a lot
+			col.sort();
+		}
+		// don't sort rows ahead of time because that can be done at each
+		// iteration
+
+		for (RowGroup row : rows) {
+			row.sort();
+
+		}
 
 	}
 
