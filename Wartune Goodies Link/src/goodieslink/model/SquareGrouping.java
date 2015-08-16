@@ -32,6 +32,10 @@ public abstract class SquareGrouping implements Iterable<Square> {
 		sorted = false;
 	}
 
+	public Square get(int index) throws IndexOutOfBoundsException {
+		return group.get(index);
+	}
+
 	public Iterator<Square> iterator() {
 		return group.iterator();
 	}
@@ -59,4 +63,8 @@ public abstract class SquareGrouping implements Iterable<Square> {
 	}
 
 	public abstract double minSpacing();
+
+	public int size() {
+		return group.size();
+	}
 }
