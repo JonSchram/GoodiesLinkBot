@@ -3,6 +3,7 @@ package goodieslink.model;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,11 +12,12 @@ import goodieslink.processing.matching.DifferenceSquaredMeasure;
 import goodieslink.processing.matching.RegionMatcher;
 
 public class GameBoard {
-	private BufferedImage sourceImage;
+	// private BufferedImage sourceImage;
 	private List<Square> gridLocations;
 	private int[][] iconIds;
 	private Square[][] squareLocations;
 	private RegionMatcher matcher;
+	double similarityThreshold;
 
 	/**
 	 * Maxmimum difference between square centers for squares to no longer be
@@ -23,29 +25,67 @@ public class GameBoard {
 	 */
 	private int tolerance;
 
-	public GameBoard(BufferedImage sourceImage, int tolerance, int searchMargin) {
-		this.sourceImage = sourceImage;
-		this.tolerance = tolerance;
+	public GameBoard(BufferedImage sourceImage, int locationTolerance, int searchMargin, double similarityThreshold) {
+		// this.sourceImage = sourceImage;
+		this.tolerance = locationTolerance;
 		this.matcher = new RegionMatcher(sourceImage, new DifferenceSquaredMeasure(), searchMargin);
+		this.similarityThreshold = similarityThreshold;
 	}
 
 	public void setGridLocations(List<Square> gridLocations) {
 		this.gridLocations = gridLocations;
-		// TODO: use squares to match regions on source image
+		convertToSquareArray();
+		setSquareIds();
 	}
 
 	public void updateBoardState(BufferedImage newImage) {
-		sourceImage = newImage;
+		// sourceImage = newImage;
 		matcher.setImage(newImage);
-		// TODO: decide which squares contain matching images
+		setSquareIds();
 	}
 
 	private void setSquareIds() {
+		int nextID = 1;
+		HashSet<Integer> nonMatchingIcons = new HashSet<>();
+		// for each square
 		for (int row = 0; row < iconIds.length; row++) {
 			for (int col = 0; col < iconIds[row].length; col++) {
 				if (squareLocations[row][col] != null) {
-
+					nonMatchingIcons.clear();
+					// is a valid square
+					// compare square to all in rows above current
+					for (int i = 0; i < row - 1 && iconIds[row][col] == 0; i++) {
+						for (int j = 0; j < iconIds[i].length && iconIds[row][col] == 0; j++) {
+							// don't bother checking similarity if that icon has
+							// been checked
+							if (!nonMatchingIcons.contains(iconIds[i][j])) {
+								if (matcher.similarity(squareLocations[row][col],
+										squareLocations[i][j]) < similarityThreshold) {
+									iconIds[row][col] = iconIds[i][j];
+								} else {
+									nonMatchingIcons.add(iconIds[i][j]);
+								}
+							}
+						}
+					}
+					// compare square to all those to the left in same row
+					for (int j = 0; j < iconIds[row].length && iconIds[row][col] == 0; j++) {
+						if (!nonMatchingIcons.contains(iconIds[row][j])) {
+							if (matcher.similarity(squareLocations[row][col],
+									squareLocations[row][j]) < similarityThreshold) {
+								iconIds[row][col] = iconIds[row][j];
+							} else {
+								nonMatchingIcons.add(iconIds[row][j]);
+							}
+						}
+					}
+					if (iconIds[row][col] == 0) {
+						// no match has been found and it is end of search
+						iconIds[row][col] = nextID++;
+					}
+					// end comparisons
 				}
+				// end matching a valid square
 			}
 		}
 	}
