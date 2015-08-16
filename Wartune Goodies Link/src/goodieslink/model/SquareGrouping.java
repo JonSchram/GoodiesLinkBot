@@ -64,7 +64,22 @@ public abstract class SquareGrouping implements Iterable<Square> {
 
 	public abstract double minSpacing();
 
+	public abstract double averageMinSpacing();
+
 	public int size() {
 		return group.size();
+	}
+
+	protected double averageBoxSize() {
+		int count = group.size();
+		if (count != 0) {
+			double sizeSum = 0;
+			for (Square s : group) {
+				sizeSum += s.getSideLength();
+			}
+			return sizeSum / count;
+		} else {
+			return -1;
+		}
 	}
 }

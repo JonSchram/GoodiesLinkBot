@@ -30,8 +30,6 @@ public class RegionMatcher {
 	 * @return
 	 */
 	public double similarity(Square s1, Square s2) {
-		double result = 0;
-
 		byte[] pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
 		int pixelSize = image.getColorModel().getNumComponents();
 
@@ -49,7 +47,7 @@ public class RegionMatcher {
 			}
 		}
 
-		return result;
+		return error;
 	}
 
 	private double similarity(Square s1, Square s2, int xOffset, int yOffset, int pixelSize, byte[] pixels) {
@@ -61,7 +59,9 @@ public class RegionMatcher {
 		Rectangle imageBounds = new Rectangle(0, 0, image.getWidth(), image.getHeight());
 		Rectangle s1Clipped = s1Rect.intersection(imageBounds);
 		Rectangle s2Clipped = s2Rect.intersection(imageBounds);
-		// Rectangle intersection = s1Clipped.intersection(s2Clipped);
+		// to normalize error, transform to error per pixel
+		double area = Math.min(s1Clipped.getWidth() * s1Clipped.getHeight(),
+				s2Clipped.getWidth() * s2Clipped.getHeight());
 
 		// int offset = (int) (intersection.getX() + intersection.getY()
 		// * image.getWidth())
@@ -98,17 +98,29 @@ public class RegionMatcher {
 
 					b1 = pixels[s1Offset + 2];
 					b2 = pixels[s2Offset + 2];
+				} else if (pixelSize == 4) {
+					// has alpha component
+					// first byte is alpha
+					r1 = pixels[s1Offset + 1];
+					r2 = pixels[s2Offset + 1];
+
+					g1 = pixels[s1Offset + 2];
+					g2 = pixels[s2Offset + 2];
+
+					b1 = pixels[s1Offset + 3];
+					b2 = pixels[s2Offset + 3];
 				} else {
 					r1 = r2 = g1 = g2 = b1 = b2 = 0;
 				}
-				sumError += measureAlgorithm.similarity(r1, g1, b1, r2, g2, b2);
+				// divide by # of possible colors per channel to normalize error
+				sumError += measureAlgorithm.similarity(r1, g1, b1, r2, g2, b2) / 256;
 				s1Offset += pixelSize;
 				s2Offset += pixelSize;
 			}
 			s1Offset += s1Increment;
 			s2Offset += s2Increment;
 		}
-		return sumError;
+		return sumError / area;
 	}
 
 	@SuppressWarnings("unused")

@@ -50,17 +50,21 @@ public class GameBoard {
 		// for each square
 		for (int row = 0; row < iconIds.length; row++) {
 			for (int col = 0; col < iconIds[row].length; col++) {
+				if (row == 4 && col == 0) {
+					System.out.println("HERE");
+				}
 				if (squareLocations[row][col] != null) {
 					nonMatchingIcons.clear();
 					// is a valid square
 					// compare square to all in rows above current
-					for (int i = 0; i < row - 1 && iconIds[row][col] == 0; i++) {
+					for (int i = 0; i < row && iconIds[row][col] == 0; i++) {
 						for (int j = 0; j < iconIds[i].length && iconIds[row][col] == 0; j++) {
 							// don't bother checking similarity if that icon has
 							// been checked
 							if (!nonMatchingIcons.contains(iconIds[i][j])) {
-								if (matcher.similarity(squareLocations[row][col],
-										squareLocations[i][j]) < similarityThreshold) {
+								double similarity = matcher.similarity(squareLocations[row][col],
+										squareLocations[i][j]);
+								if (similarity < similarityThreshold) {
 									iconIds[row][col] = iconIds[i][j];
 								} else {
 									nonMatchingIcons.add(iconIds[i][j]);
@@ -69,10 +73,10 @@ public class GameBoard {
 						}
 					}
 					// compare square to all those to the left in same row
-					for (int j = 0; j < iconIds[row].length && iconIds[row][col] == 0; j++) {
+					for (int j = 0; j < col && iconIds[row][col] == 0; j++) {
 						if (!nonMatchingIcons.contains(iconIds[row][j])) {
-							if (matcher.similarity(squareLocations[row][col],
-									squareLocations[row][j]) < similarityThreshold) {
+							double similarity = matcher.similarity(squareLocations[row][col], squareLocations[row][j]);
+							if (similarity < similarityThreshold) {
 								iconIds[row][col] = iconIds[row][j];
 							} else {
 								nonMatchingIcons.add(iconIds[row][j]);
@@ -103,23 +107,25 @@ public class GameBoard {
 		}
 
 		// minimum space between squares in adjacent columns
-		double minColumnSpacing = findMinSpacing(rows);
+		// double minColumnSpacing = findMinSpacing(rows);
+		double averageColumnSpacing = findAverageSpacing(rows);
 		// minimum space between squares in adjacent rows
-		double minRowSpacing = findMinSpacing(cols);
+		// double minRowSpacing = findMinSpacing(cols);
+		double averageRowSpacing = findAverageSpacing(cols);
 
 		// only have to search rows for min because both rows and cols contain
 		// all squares
 		Point2D gridUpperLeft = findMin(rows);
 		Point2D gridLowerRight = findMax(rows);
-		int gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / minColumnSpacing);
-		int gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / minRowSpacing);
+		int gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
+		int gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
 
 		iconIds = new int[gridHeight][gridWidth];
 		squareLocations = new Square[gridHeight][gridWidth];
 
 		for (Square s : gridLocations) {
-			int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / minRowSpacing);
-			int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / minColumnSpacing);
+			int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
+			int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
 			squareLocations[rowNum][colNum] = s;
 		}
 
@@ -175,6 +181,29 @@ public class GameBoard {
 				}
 			}
 			return minSpacing;
+		} else {
+			return -1;
+		}
+	}
+
+	private double findAverageSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
+		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
+		if (groupIterator.hasNext()) {
+			int count = 0;
+			double spaceSum = 0;
+			while (groupIterator.hasNext()) {
+				SquareGrouping group = groupIterator.next();
+				double averageSpace = group.averageMinSpacing();
+				if (averageSpace != -1) {
+					count++;
+					spaceSum += averageSpace;
+				}
+			}
+			if (count != 0) {
+				return spaceSum / count;
+			} else {
+				return -1;
+			}
 		} else {
 			return -1;
 		}
