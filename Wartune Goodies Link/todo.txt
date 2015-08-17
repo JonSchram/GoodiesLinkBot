@@ -1,0 +1,5 @@
+Speed up image processing - potentially multithread the job.
+Perform pathfinding
+Add UI
+ -- Add Automatic clicking
+ -- Add "help" or build instructions into interface
