@@ -77,6 +77,7 @@ public class RegionMatcher {
 		// precise amount to get to beginning of next rectangle
 		int s1Increment = (int) (pixelSize * (image.getWidth() - 1 - s1Clipped.getWidth()));
 		int s2Increment = (int) (pixelSize * (image.getWidth() - 1 - s2Clipped.getWidth()));
+		s1Increment = s2Increment = Math.max(s1Increment, s2Increment);
 		// int iterationIncrement = (int) (pixelSize * (image.getWidth() -
 		// intersection
 		// .getWidth()));

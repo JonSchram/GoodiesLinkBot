@@ -32,18 +32,30 @@ public class Test {
 		BufferedImage inputImage;
 		try {
 			inputImage = ImageIO.read(new File(imageFilename));
+			long startRead, endRead;
+			startRead = System.nanoTime();
 			Mat imageMat = Highgui.imread(imageFilename, Highgui.IMREAD_ANYCOLOR);
+			endRead = System.nanoTime();
+			System.out.println("Image read: " + (endRead - startRead) / 1.0e6 + " ms");
 
+			long startEdge, endEdge;
+			startEdge = System.nanoTime();
 			Imgproc.blur(imageMat, imageMat, new Size(1, 1));
 			Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_RGBA2GRAY);
 			Imgproc.Canny(imageMat, imageMat, 50, 150, 3, false);
 			BufferedImage edgeImage = toBufferedImage(imageMat);
+			endEdge = System.nanoTime();
+			System.out.println("Edge detection: " + (endEdge - startEdge) / 1.0e6 + " ms");
 
 			// square size is limited to not give too-big square
 			// SquareTransform st = new SquareTransform(edgeImage, 19, 21);
 			// one square will be too big
+			long startSquare, endSquare;
+			startSquare = System.nanoTime();
 			SquareTransform st = new SquareTransform(edgeImage, 19, 23);
 			st.process();
+			endSquare = System.nanoTime();
+			System.out.println("Square detection: " + (endSquare - startSquare) / 1.0e6 + " ms");
 			List<Square> squares = st.getBoxes(.85, new GridFilter(20, 7));
 			// for (Square s : squares) {
 			// System.out.println(s);
@@ -53,8 +65,13 @@ public class Test {
 			so.addSquares(squares);
 			so.show();
 
+			long startSimilarity, endSimilarity;
+			startSimilarity = System.nanoTime();
 			GameBoard gb = new GameBoard(inputImage, 20, 4, 10);
 			gb.setGridLocations(squares);
+			endSimilarity = System.nanoTime();
+			System.out.println("Square similarity: " + (endSimilarity - startSimilarity) / 1.0e6 + " ms");
+			System.out.println("DONE");
 
 			// RegionMatcher rm = new RegionMatcher(inputImage,
 			// new DifferenceSquaredMeasure(), 3);

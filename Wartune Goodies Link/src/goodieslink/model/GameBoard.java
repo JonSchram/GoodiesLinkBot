@@ -50,9 +50,6 @@ public class GameBoard {
 		// for each square
 		for (int row = 0; row < iconIds.length; row++) {
 			for (int col = 0; col < iconIds[row].length; col++) {
-				if (row == 4 && col == 0) {
-					System.out.println("HERE");
-				}
 				if (squareLocations[row][col] != null) {
 					nonMatchingIcons.clear();
 					// is a valid square
