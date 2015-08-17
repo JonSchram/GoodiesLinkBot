@@ -1,15 +1,23 @@
 package goodieslink.model;
 
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import goodieslink.processing.Square;
 import goodieslink.processing.matching.DifferenceSquaredMeasure;
 import goodieslink.processing.matching.RegionMatcher;
+import goodieslink.processing.matching.SimilarityResult;
 
 public class GameBoard {
 	// private BufferedImage sourceImage;
@@ -46,7 +54,13 @@ public class GameBoard {
 
 	private void setSquareIds() {
 		int nextID = 1;
-		HashSet<Integer> nonMatchingIcons = new HashSet<>();
+		// HashSet<Integer> nonMatchingIcons = new HashSet<>();
+		Set<Integer> nonMatchingIcons = Collections.synchronizedSet(new HashSet<Integer>());
+
+		int numOfCores = Runtime.getRuntime().availableProcessors();
+		ExecutorService pool = Executors.newFixedThreadPool(numOfCores);
+		// ExecutorService pool = Executors.newCachedThreadPool();
+		Set<Future<SimilarityResult>> futures = new HashSet<>();
 		// for each square
 		for (int row = 0; row < iconIds.length; row++) {
 			for (int col = 0; col < iconIds[row].length; col++) {
@@ -59,25 +73,56 @@ public class GameBoard {
 							// don't bother checking similarity if that icon has
 							// been checked
 							if (!nonMatchingIcons.contains(iconIds[i][j])) {
-								double similarity = matcher.similarity(squareLocations[row][col],
-										squareLocations[i][j]);
-								if (similarity < similarityThreshold) {
-									iconIds[row][col] = iconIds[i][j];
-								} else {
-									nonMatchingIcons.add(iconIds[i][j]);
-								}
+								Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(i, j),
+										new Point(row, col), iconIds[i][j], squareLocations[row][col],
+										squareLocations[i][j], matcher, nonMatchingIcons));
+								futures.add(future);
+								// double similarity =
+								// matcher.similarity(squareLocations[row][col],
+								// squareLocations[i][j]);
+								// if (similarity < similarityThreshold) {
+								// iconIds[row][col] = iconIds[i][j];
+								// } else {
+								// nonMatchingIcons.add(iconIds[i][j]);
+								// }
 							}
 						}
 					}
 					// compare square to all those to the left in same row
 					for (int j = 0; j < col && iconIds[row][col] == 0; j++) {
 						if (!nonMatchingIcons.contains(iconIds[row][j])) {
-							double similarity = matcher.similarity(squareLocations[row][col], squareLocations[row][j]);
-							if (similarity < similarityThreshold) {
-								iconIds[row][col] = iconIds[row][j];
-							} else {
-								nonMatchingIcons.add(iconIds[row][j]);
+							Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(row, j),
+									new Point(row, col), iconIds[row][j], squareLocations[row][col],
+									squareLocations[row][j], matcher, nonMatchingIcons));
+							futures.add(future);
+							// double similarity =
+							// matcher.similarity(squareLocations[row][col],
+							// squareLocations[row][j]);
+							// if (similarity < similarityThreshold) {
+							// iconIds[row][col] = iconIds[row][j];
+							// } else {
+							// nonMatchingIcons.add(iconIds[row][j]);
+							// }
+						}
+					}
+					boolean foundSimilar = false;
+					for (Future<SimilarityResult> f : futures) {
+						if (!foundSimilar && !f.isCancelled()) {
+							SimilarityResult sr;
+							try {
+								sr = f.get();
+								if (sr.getSimilarity() < similarityThreshold) {
+									foundSimilar = true;
+									Point dest = sr.getDest();
+									iconIds[dest.x][dest.y] = sr.getSourceValue();
+								} else {
+									nonMatchingIcons.add(sr.getSourceValue());
+								}
+							} catch (InterruptedException | ExecutionException e) {
+								e.printStackTrace();
 							}
+						} else {
+							f.cancel(true);
 						}
 					}
 					if (iconIds[row][col] == 0) {
@@ -87,6 +132,7 @@ public class GameBoard {
 					// end comparisons
 				}
 				// end matching a valid square
+
 			}
 		}
 	}
