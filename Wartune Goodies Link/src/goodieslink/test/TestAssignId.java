@@ -1,6 +1,7 @@
 package goodieslink.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -23,7 +24,6 @@ import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
-import goodieslink.ui.SquareOverlay;
 
 public class TestAssignId {
 

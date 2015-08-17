@@ -1,7 +1,5 @@
 package goodieslink.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;

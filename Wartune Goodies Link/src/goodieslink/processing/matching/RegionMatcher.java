@@ -11,15 +11,18 @@ public class RegionMatcher {
 	private BufferedImage image;
 	private SimilarityMeasure measureAlgorithm;
 	private int maxOffset;
+	byte[] pixels;
 
 	public RegionMatcher(BufferedImage source, SimilarityMeasure similarityAlgorithm, int pixelTolerance) {
 		image = source;
 		measureAlgorithm = similarityAlgorithm;
 		maxOffset = pixelTolerance;
+		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
 	}
 
 	public void setImage(BufferedImage source) {
 		this.image = source;
+		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
 	}
 
 	/**
@@ -30,7 +33,10 @@ public class RegionMatcher {
 	 * @return
 	 */
 	public double similarity(Square s1, Square s2) {
-		byte[] pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
+		// runs faster if the matcher doesn't get a new copy of pixel data each
+		// call
+		// byte[] pixels = ((DataBufferByte)
+		// image.getData().getDataBuffer()).getData();
 		int pixelSize = image.getColorModel().getNumComponents();
 
 		// attempt to match the image with every possible horizontal and
