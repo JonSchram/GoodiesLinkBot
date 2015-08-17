@@ -30,7 +30,7 @@ public class GameBoard {
 	double similarityThreshold;
 
 	/**
-	 * Maxmimum difference between square centers for squares to no longer be
+	 * Maximum difference between square centers for squares to no longer be
 	 * considered in the same row/column any more
 	 */
 	private int tolerance;
@@ -222,10 +222,37 @@ public class GameBoard {
 		return -1;
 	}
 
+	public void removeSpace(int row, int col) {
+		if (iconIds != null) {
+			if (row >= 0 && row < iconIds.length) {
+				if (col >= 0 && col < iconIds[row].length) {
+					// clear by setting icon to 0 and
+					// setting that square to null
+					iconIds[row][col] = 0;
+					squareLocations[row][col] = null;
+				}
+			}
+		}
+	}
+
+	public void removeSpace(Point space) {
+		removeSpace(space.y, space.x);
+	}
+
 	public void setGridLocations(List<Square> gridLocations) {
 		this.gridLocations = gridLocations;
 		convertToSquareArray();
 		setSquareIds();
+	}
+
+	public void setSquareId(int row, int col, int id) {
+		if (iconIds != null) {
+			if (row >= 0 && row < iconIds.length) {
+				if (col >= 0 && col < iconIds[row].length) {
+					iconIds[row][col] = id;
+				}
+			}
+		}
 	}
 
 	private void setSquareIds() {

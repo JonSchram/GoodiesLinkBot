@@ -20,6 +20,17 @@ public class RegionMatcher {
 		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
 	}
 
+	@SuppressWarnings("unused")
+	private void previewScan(byte[] pixels) {
+		BufferedImage bi = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+		byte[] rasterData = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
+		System.arraycopy(pixels, 0, rasterData, 0, pixels.length);
+
+		ImagePreview ip = new ImagePreview(bi);
+		ip.show();
+
+	}
+
 	public void setImage(BufferedImage source) {
 		this.image = source;
 		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
@@ -128,16 +139,5 @@ public class RegionMatcher {
 			s2Offset += s2Increment;
 		}
 		return sumError / area;
-	}
-
-	@SuppressWarnings("unused")
-	private void previewScan(byte[] pixels) {
-		BufferedImage bi = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-		byte[] rasterData = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-		System.arraycopy(pixels, 0, rasterData, 0, pixels.length);
-
-		ImagePreview ip = new ImagePreview(bi);
-		ip.show();
-
 	}
 }

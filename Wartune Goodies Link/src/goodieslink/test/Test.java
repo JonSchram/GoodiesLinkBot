@@ -18,6 +18,8 @@ import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
+import goodieslink.processing.pathfinding.GoodiePath;
+import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.SquareOverlay;
 
 public class Test {
@@ -73,6 +75,10 @@ public class Test {
 			endSimilarity = System.nanoTime();
 			System.out.println("Square similarity: " + (endSimilarity - startSimilarity) / 1.0e6 + " ms");
 			System.out.println("DONE");
+
+			Pathfinder pathFinder = new Pathfinder(gb);
+			GoodiePath path = pathFinder.findPath();
+			System.out.println(path);
 
 			// RegionMatcher rm = new RegionMatcher(inputImage,
 			// new DifferenceSquaredMeasure(), 3);
