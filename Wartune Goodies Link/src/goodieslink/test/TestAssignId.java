@@ -59,16 +59,81 @@ public class TestAssignId {
 			assertEquals(12, d.width);
 			assertEquals(6, d.height);
 
-			// obtained by running program and manually verifying
-			int[][] expected = { { 1, 2, 3, 4, 5, 6, 1, 3, 7, 8, 9, 10 }, { 1, 11, 2, 12, 13, 4, 4, 10, 9, 14, 15, 16 },
-					{ 8, 17, 16, 18, 6, 19, 16, 20, 2, 5, 7, 21 }, { 10, 15, 9, 16, 4, 1, 19, 9, 22, 23, 9, 14 },
-					{ 4, 24, 2, 10, 18, 25, 4, 26, 11, 17, 25, 22 }, { 24, 9, 19, 21, 20, 2, 26, 13, 12, 2, 19, 23 } };
-
-			for (int y = 0; y < d.height; y++) {
-				for (int x = 0; x < d.width; x++) {
-					assertEquals(expected[y][x], gb.getSquareId(y, x));
-				}
-			}
+			// generated using GenerateBoardTest.java
+			// will work as long as the matching tiles are in the same location
+			// (since this is highly unlikely to happen by chance it only works
+			// on this test image/images derived from it)
+			assertEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 0));
+			assertEquals(gb.getSquareId(1, 0), gb.getSquareId(0, 6));
+			assertEquals(gb.getSquareId(0, 6), gb.getSquareId(3, 5));
+			assertEquals(gb.getSquareId(0, 1), gb.getSquareId(1, 2));
+			assertEquals(gb.getSquareId(1, 2), gb.getSquareId(2, 8));
+			assertEquals(gb.getSquareId(2, 8), gb.getSquareId(4, 2));
+			assertEquals(gb.getSquareId(4, 2), gb.getSquareId(5, 5));
+			assertEquals(gb.getSquareId(5, 5), gb.getSquareId(5, 9));
+			assertEquals(gb.getSquareId(0, 2), gb.getSquareId(0, 7));
+			assertEquals(gb.getSquareId(4, 0), gb.getSquareId(1, 5));
+			assertEquals(gb.getSquareId(1, 5), gb.getSquareId(0, 3));
+			assertEquals(gb.getSquareId(0, 3), gb.getSquareId(1, 6));
+			assertEquals(gb.getSquareId(1, 6), gb.getSquareId(3, 4));
+			assertEquals(gb.getSquareId(3, 4), gb.getSquareId(4, 6));
+			assertEquals(gb.getSquareId(0, 4), gb.getSquareId(2, 9));
+			assertEquals(gb.getSquareId(2, 4), gb.getSquareId(0, 5));
+			assertEquals(gb.getSquareId(0, 8), gb.getSquareId(2, 10));
+			assertEquals(gb.getSquareId(2, 0), gb.getSquareId(0, 9));
+			assertEquals(gb.getSquareId(1, 8), gb.getSquareId(0, 10));
+			assertEquals(gb.getSquareId(0, 10), gb.getSquareId(3, 7));
+			assertEquals(gb.getSquareId(3, 7), gb.getSquareId(3, 2));
+			assertEquals(gb.getSquareId(3, 2), gb.getSquareId(3, 10));
+			assertEquals(gb.getSquareId(3, 10), gb.getSquareId(5, 1));
+			assertEquals(gb.getSquareId(0, 11), gb.getSquareId(3, 0));
+			assertEquals(gb.getSquareId(3, 0), gb.getSquareId(4, 3));
+			assertEquals(gb.getSquareId(4, 3), gb.getSquareId(1, 7));
+			assertEquals(gb.getSquareId(1, 1), gb.getSquareId(4, 8));
+			assertEquals(gb.getSquareId(1, 3), gb.getSquareId(5, 8));
+			assertEquals(gb.getSquareId(1, 4), gb.getSquareId(5, 7));
+			assertEquals(gb.getSquareId(1, 9), gb.getSquareId(3, 11));
+			assertEquals(gb.getSquareId(1, 10), gb.getSquareId(3, 1));
+			assertEquals(gb.getSquareId(2, 2), gb.getSquareId(3, 3));
+			assertEquals(gb.getSquareId(3, 3), gb.getSquareId(1, 11));
+			assertEquals(gb.getSquareId(1, 11), gb.getSquareId(2, 6));
+			assertEquals(gb.getSquareId(2, 1), gb.getSquareId(4, 9));
+			assertEquals(gb.getSquareId(4, 4), gb.getSquareId(2, 3));
+			assertEquals(gb.getSquareId(3, 6), gb.getSquareId(2, 5));
+			assertEquals(gb.getSquareId(2, 5), gb.getSquareId(5, 10));
+			assertEquals(gb.getSquareId(5, 10), gb.getSquareId(5, 2));
+			assertEquals(gb.getSquareId(2, 7), gb.getSquareId(5, 4));
+			assertEquals(gb.getSquareId(5, 3), gb.getSquareId(2, 11));
+			assertEquals(gb.getSquareId(4, 11), gb.getSquareId(3, 8));
+			assertEquals(gb.getSquareId(3, 9), gb.getSquareId(5, 11));
+			assertEquals(gb.getSquareId(4, 1), gb.getSquareId(5, 0));
+			assertEquals(gb.getSquareId(4, 5), gb.getSquareId(4, 10));
+			assertEquals(gb.getSquareId(5, 6), gb.getSquareId(4, 7));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(0, 1));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(0, 2));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(4, 0));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(0, 4));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(2, 4));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(0, 8));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(2, 0));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 8));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(0, 11));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 1));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 3));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 4));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 9));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(1, 10));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(2, 2));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(2, 1));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(4, 4));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(3, 6));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(2, 7));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(5, 3));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(4, 11));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(3, 9));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(4, 1));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(4, 5));
+			assertNotEquals(gb.getSquareId(0, 0), gb.getSquareId(5, 6));
 
 		} catch (IOException e) {
 			e.printStackTrace();

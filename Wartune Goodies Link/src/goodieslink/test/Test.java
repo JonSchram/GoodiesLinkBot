@@ -1,4 +1,4 @@
-package goodieslink.ui;
+package goodieslink.test;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -18,6 +18,7 @@ import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
+import goodieslink.ui.SquareOverlay;
 
 public class Test {
 	public static void main(String[] args) {
