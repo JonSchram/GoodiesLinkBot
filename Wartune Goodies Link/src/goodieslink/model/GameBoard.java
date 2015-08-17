@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -60,7 +61,7 @@ public class GameBoard {
 		int numOfCores = Runtime.getRuntime().availableProcessors();
 		ExecutorService pool = Executors.newFixedThreadPool(numOfCores);
 		// ExecutorService pool = Executors.newCachedThreadPool();
-		Set<Future<SimilarityResult>> futures = new HashSet<>();
+		List<Future<SimilarityResult>> futures = new LinkedList<>();
 		// for each square
 		for (int row = 0; row < iconIds.length; row++) {
 			for (int col = 0; col < iconIds[row].length; col++) {
@@ -107,7 +108,7 @@ public class GameBoard {
 					}
 					boolean foundSimilar = false;
 					for (Future<SimilarityResult> f : futures) {
-						if (!foundSimilar && !f.isCancelled()) {
+						if (!foundSimilar) {
 							SimilarityResult sr;
 							try {
 								sr = f.get();
@@ -122,9 +123,11 @@ public class GameBoard {
 								e.printStackTrace();
 							}
 						} else {
-							f.cancel(true);
+							f.cancel(false);
 						}
+						// futureIterator.remove();
 					}
+					futures.clear();
 					if (iconIds[row][col] == 0) {
 						// no match has been found and it is end of search
 						iconIds[row][col] = nextID++;

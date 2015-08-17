@@ -31,9 +31,8 @@ public class GameBoardWorker implements Callable<SimilarityResult> {
 	@Override
 	public SimilarityResult call() throws Exception {
 		double similarity;
-		if (nonMatchingSet.contains(sourceId)) {
+		if (!nonMatchingSet.contains(sourceId)) {
 			similarity = measure.similarity(s1, s2);
-
 		} else {
 			similarity = Double.MAX_VALUE;
 		}
