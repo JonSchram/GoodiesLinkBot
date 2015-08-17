@@ -2,6 +2,7 @@ Speed up image processing - potentially multithread the job.
 	--done, but clearing the futures list has a significant performance hit
 	--can try changing the design so I don't have to clear the list and also won't access finished futures
 Perform pathfinding
+  --done, needs more thorough testing to be sure
 Add UI
  -- Add Automatic clicking
  -- Add "help" or build instructions into interface

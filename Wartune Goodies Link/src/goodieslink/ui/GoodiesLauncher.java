@@ -13,8 +13,6 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
-import goodieslink.processing.image.CannyEdgeDetector;
-
 public class GoodiesLauncher {
 	public static void main(String[] args) {
 		// thanks to
@@ -29,10 +27,10 @@ public class GoodiesLauncher {
 			// BufferedImage bi = ImageIO.read(new File(
 			// "Goodies link edge detection/blue screenshot.png"));
 
-			CannyEdgeDetector edgeDetector = new CannyEdgeDetector();
+			// CannyEdgeDetector edgeDetector = new CannyEdgeDetector();
 
 			// long startCanny, endCanny;
-			edgeDetector.setSourceImage(bi);
+			// edgeDetector.setSourceImage(bi);
 			// edgeDetector.setGaussianKernelRadius(1f);
 			// edgeDetector.setGaussianKernelWidth(4);
 			// edgeDetector.setHighThreshold(10f);
