@@ -1,5 +1,6 @@
 package goodieslink.model;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -41,15 +42,189 @@ public class GameBoard {
 		this.similarityThreshold = similarityThreshold;
 	}
 
+	private void convertToSquareArray() {
+		ArrayList<RowGroup> rows = new ArrayList<>();
+		ArrayList<ColumnGroup> cols = new ArrayList<>();
+		getRowColumnList(rows, cols);
+
+		for (RowGroup row : rows) {
+			row.sort();
+		}
+		for (ColumnGroup col : cols) {
+			col.sort();
+		}
+
+		// minimum space between squares in adjacent columns
+		// double minColumnSpacing = findMinSpacing(rows);
+		double averageColumnSpacing = findAverageSpacing(rows);
+		// minimum space between squares in adjacent rows
+		// double minRowSpacing = findMinSpacing(cols);
+		double averageRowSpacing = findAverageSpacing(cols);
+
+		// only have to search rows for min because both rows and cols contain
+		// all squares
+		Point2D gridUpperLeft = findMin(rows);
+		Point2D gridLowerRight = findMax(rows);
+		int gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
+		int gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
+
+		iconIds = new int[gridHeight][gridWidth];
+		squareLocations = new Square[gridHeight][gridWidth];
+
+		for (Square s : gridLocations) {
+			int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
+			int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
+			squareLocations[rowNum][colNum] = s;
+		}
+
+	}
+
+	private double findAverageSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
+		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
+		if (groupIterator.hasNext()) {
+			int count = 0;
+			double spaceSum = 0;
+			while (groupIterator.hasNext()) {
+				SquareGrouping group = groupIterator.next();
+				double averageSpace = group.averageMinSpacing();
+				if (averageSpace != -1) {
+					count++;
+					spaceSum += averageSpace;
+				}
+			}
+			if (count != 0) {
+				return spaceSum / count;
+			} else {
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+	}
+
+	private Point2D.Double findMax(ArrayList<? extends SquareGrouping> squareGroups) {
+		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
+		SquareGrouping group = groupIterator.next();
+		double maxX = group.get(group.size() - 1).getCenterX();
+		double maxY = group.get(group.size() - 1).getCenterY();
+		while (groupIterator.hasNext()) {
+			group = groupIterator.next();
+			double tempX = group.get(group.size() - 1).getCenterX();
+			double tempY = group.get(group.size() - 1).getCenterY();
+			if (tempX > maxX) {
+				maxX = tempX;
+			}
+			if (tempY > maxY) {
+				maxY = tempY;
+			}
+		}
+		return new Point2D.Double(maxX, maxY);
+	}
+
+	private Point2D.Double findMin(ArrayList<? extends SquareGrouping> squareGroups) {
+		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
+		SquareGrouping group = groupIterator.next();
+		double minX = group.get(0).getCenterX();
+		double minY = group.get(0).getCenterY();
+		while (groupIterator.hasNext()) {
+			group = groupIterator.next();
+			double tempX = group.get(0).getCenterX();
+			double tempY = group.get(0).getCenterY();
+			if (tempX < minX) {
+				minX = tempX;
+			}
+			if (tempY < minY) {
+				minY = tempY;
+			}
+		}
+		return new Point2D.Double(minX, minY);
+	}
+
+	@SuppressWarnings("unused")
+	private double findMinSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
+		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
+		if (groupIterator.hasNext()) {
+			double minSpacing = groupIterator.next().minSpacing();
+			while (groupIterator.hasNext()) {
+				SquareGrouping group = groupIterator.next();
+				double temp = group.minSpacing();
+				if (temp < minSpacing) {
+					minSpacing = temp;
+				}
+			}
+			return minSpacing;
+		} else {
+			return -1;
+		}
+	}
+
+	private void getRowColumnList(ArrayList<RowGroup> rows, ArrayList<ColumnGroup> cols) {
+		Iterator<Square> squareIterator = gridLocations.iterator();
+		while (squareIterator.hasNext()) {
+			Square s = squareIterator.next();
+			// put square in proper row
+			boolean belongs = false;
+			Iterator<RowGroup> rowIterator = rows.iterator();
+			while (rowIterator.hasNext() && !belongs) {
+				RowGroup temp = rowIterator.next();
+				if (temp.belongs(s)) {
+					temp.add(s);
+					belongs = true;
+				}
+			}
+			if (!belongs) {
+				// didn't belong to any row
+				RowGroup newRow = new RowGroup(tolerance);
+				newRow.add(s);
+				rows.add(newRow);
+			}
+
+			// put in proper column
+			belongs = false;
+			Iterator<ColumnGroup> columnIterator = cols.iterator();
+			while (columnIterator.hasNext() && !belongs) {
+				ColumnGroup temp = columnIterator.next();
+				if (temp.belongs(s)) {
+					temp.add(s);
+					belongs = true;
+				}
+			}
+			if (!belongs) {
+				// didn't belong to any column
+				ColumnGroup newCol = new ColumnGroup(tolerance);
+				newCol.add(s);
+				cols.add(newCol);
+			}
+		}
+	}
+
+	public Dimension getSize() {
+		int width;
+		int height;
+		if (iconIds != null) {
+			width = iconIds[0].length;
+			height = iconIds.length;
+		} else {
+			width = 0;
+			height = 0;
+		}
+		return new Dimension(width, height);
+	}
+
+	public int getSquareId(int row, int col) {
+		if (iconIds != null) {
+			if (row >= 0 && row < iconIds.length) {
+				if (col >= 0 && col < iconIds[row].length) {
+					return iconIds[row][col];
+				}
+			}
+		}
+		return -1;
+	}
+
 	public void setGridLocations(List<Square> gridLocations) {
 		this.gridLocations = gridLocations;
 		convertToSquareArray();
-		setSquareIds();
-	}
-
-	public void updateBoardState(BufferedImage newImage) {
-		// sourceImage = newImage;
-		matcher.setImage(newImage);
 		setSquareIds();
 	}
 
@@ -140,159 +315,10 @@ public class GameBoard {
 		}
 	}
 
-	private void convertToSquareArray() {
-		ArrayList<RowGroup> rows = new ArrayList<>();
-		ArrayList<ColumnGroup> cols = new ArrayList<>();
-		getRowColumnList(rows, cols);
-
-		for (RowGroup row : rows) {
-			row.sort();
-		}
-		for (ColumnGroup col : cols) {
-			col.sort();
-		}
-
-		// minimum space between squares in adjacent columns
-		// double minColumnSpacing = findMinSpacing(rows);
-		double averageColumnSpacing = findAverageSpacing(rows);
-		// minimum space between squares in adjacent rows
-		// double minRowSpacing = findMinSpacing(cols);
-		double averageRowSpacing = findAverageSpacing(cols);
-
-		// only have to search rows for min because both rows and cols contain
-		// all squares
-		Point2D gridUpperLeft = findMin(rows);
-		Point2D gridLowerRight = findMax(rows);
-		int gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
-		int gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
-
-		iconIds = new int[gridHeight][gridWidth];
-		squareLocations = new Square[gridHeight][gridWidth];
-
-		for (Square s : gridLocations) {
-			int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
-			int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
-			squareLocations[rowNum][colNum] = s;
-		}
-
-	}
-
-	private Point2D.Double findMin(ArrayList<? extends SquareGrouping> squareGroups) {
-		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
-		SquareGrouping group = groupIterator.next();
-		double minX = group.get(0).getCenterX();
-		double minY = group.get(0).getCenterY();
-		while (groupIterator.hasNext()) {
-			group = groupIterator.next();
-			double tempX = group.get(0).getCenterX();
-			double tempY = group.get(0).getCenterY();
-			if (tempX < minX) {
-				minX = tempX;
-			}
-			if (tempY < minY) {
-				minY = tempY;
-			}
-		}
-		return new Point2D.Double(minX, minY);
-	}
-
-	private Point2D.Double findMax(ArrayList<? extends SquareGrouping> squareGroups) {
-		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
-		SquareGrouping group = groupIterator.next();
-		double maxX = group.get(group.size() - 1).getCenterX();
-		double maxY = group.get(group.size() - 1).getCenterY();
-		while (groupIterator.hasNext()) {
-			group = groupIterator.next();
-			double tempX = group.get(group.size() - 1).getCenterX();
-			double tempY = group.get(group.size() - 1).getCenterY();
-			if (tempX > maxX) {
-				maxX = tempX;
-			}
-			if (tempY > maxY) {
-				maxY = tempY;
-			}
-		}
-		return new Point2D.Double(maxX, maxY);
-	}
-
-	private double findMinSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
-		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
-		if (groupIterator.hasNext()) {
-			double minSpacing = groupIterator.next().minSpacing();
-			while (groupIterator.hasNext()) {
-				SquareGrouping group = groupIterator.next();
-				double temp = group.minSpacing();
-				if (temp < minSpacing) {
-					minSpacing = temp;
-				}
-			}
-			return minSpacing;
-		} else {
-			return -1;
-		}
-	}
-
-	private double findAverageSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
-		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
-		if (groupIterator.hasNext()) {
-			int count = 0;
-			double spaceSum = 0;
-			while (groupIterator.hasNext()) {
-				SquareGrouping group = groupIterator.next();
-				double averageSpace = group.averageMinSpacing();
-				if (averageSpace != -1) {
-					count++;
-					spaceSum += averageSpace;
-				}
-			}
-			if (count != 0) {
-				return spaceSum / count;
-			} else {
-				return -1;
-			}
-		} else {
-			return -1;
-		}
-	}
-
-	private void getRowColumnList(ArrayList<RowGroup> rows, ArrayList<ColumnGroup> cols) {
-		Iterator<Square> squareIterator = gridLocations.iterator();
-		while (squareIterator.hasNext()) {
-			Square s = squareIterator.next();
-			// put square in proper row
-			boolean belongs = false;
-			Iterator<RowGroup> rowIterator = rows.iterator();
-			while (rowIterator.hasNext() && !belongs) {
-				RowGroup temp = rowIterator.next();
-				if (temp.belongs(s)) {
-					temp.add(s);
-					belongs = true;
-				}
-			}
-			if (!belongs) {
-				// didn't belong to any row
-				RowGroup newRow = new RowGroup(tolerance);
-				newRow.add(s);
-				rows.add(newRow);
-			}
-
-			// put in proper column
-			belongs = false;
-			Iterator<ColumnGroup> columnIterator = cols.iterator();
-			while (columnIterator.hasNext() && !belongs) {
-				ColumnGroup temp = columnIterator.next();
-				if (temp.belongs(s)) {
-					temp.add(s);
-					belongs = true;
-				}
-			}
-			if (!belongs) {
-				// didn't belong to any column
-				ColumnGroup newCol = new ColumnGroup(tolerance);
-				newCol.add(s);
-				cols.add(newCol);
-			}
-		}
+	public void updateBoardState(BufferedImage newImage) {
+		// sourceImage = newImage;
+		matcher.setImage(newImage);
+		setSquareIds();
 	}
 
 }
