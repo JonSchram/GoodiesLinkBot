@@ -27,7 +27,42 @@ public class GameBoard {
 	private int[][] iconIds;
 	private Square[][] squareLocations;
 	private RegionMatcher matcher;
-	double similarityThreshold;
+	private double similarityThreshold;
+
+	/**
+	 * Whether this object has processed an image to find matching squares
+	 */
+	private boolean initialized;
+	/**
+	 * Location of square (in pixel coordinates) in the upper left corner of the
+	 * game board.<br>
+	 * There is not necessarily a square in this location, but is the location
+	 * that a square would be if there were one.
+	 */
+	private Point2D gridUpperLeft;
+	/**
+	 * Location of square (in pixel coordinates) in the lower right corner of
+	 * the game board.<br>
+	 * There is not necessarily a square in this location, but is the location
+	 * that a square would be if there were one.
+	 */
+	private Point2D gridLowerRight;
+	/**
+	 * Number of squares horizontally
+	 */
+	private int gridWidth;
+	/**
+	 * Number of squares vertically
+	 */
+	private int gridHeight;
+	/**
+	 * average space (in pixels) between squares in adjacent columns
+	 */
+	private double averageColumnSpacing;
+	/**
+	 * average space (in pixels) between squares in adjacent rows
+	 */
+	private double averageRowSpacing;
 
 	/**
 	 * Maximum difference between square centers for squares to no longer be
@@ -56,17 +91,17 @@ public class GameBoard {
 
 		// minimum space between squares in adjacent columns
 		// double minColumnSpacing = findMinSpacing(rows);
-		double averageColumnSpacing = findAverageSpacing(rows);
+		averageColumnSpacing = findAverageSpacing(rows);
 		// minimum space between squares in adjacent rows
 		// double minRowSpacing = findMinSpacing(cols);
-		double averageRowSpacing = findAverageSpacing(cols);
+		averageRowSpacing = findAverageSpacing(cols);
 
 		// only have to search rows for min because both rows and cols contain
 		// all squares
-		Point2D gridUpperLeft = findMin(rows);
-		Point2D gridLowerRight = findMax(rows);
-		int gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
-		int gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
+		gridUpperLeft = findMin(rows);
+		gridLowerRight = findMax(rows);
+		gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
+		gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
 
 		iconIds = new int[gridHeight][gridWidth];
 		squareLocations = new Square[gridHeight][gridWidth];
@@ -201,9 +236,9 @@ public class GameBoard {
 	public Dimension getSize() {
 		int width;
 		int height;
-		if (iconIds != null) {
-			width = iconIds[0].length;
-			height = iconIds.length;
+		if (initialized) {
+			width = gridWidth;
+			height = gridHeight;
 		} else {
 			width = 0;
 			height = 0;
@@ -220,6 +255,46 @@ public class GameBoard {
 			}
 		}
 		return -1;
+	}
+
+	/**
+	 * Computes the location of the pixel at the center of the location on the
+	 * grid.
+	 * 
+	 * @param gridLocation
+	 * @return
+	 */
+	public Point gridToPixel(Point gridLocation) {
+		int pixelX = 0;
+		int pixelY = 0;
+		if (initialized) {
+			pixelX = (int) (gridUpperLeft.getX() + gridLocation.getX() * averageColumnSpacing);
+			pixelY = (int) (gridUpperLeft.getY() + gridLocation.getY() * averageRowSpacing);
+		}
+		Point result = new Point(pixelX, pixelY);
+		return result;
+	}
+
+	public boolean isInitialized() {
+		return initialized;
+	}
+
+	/**
+	 * Computes the closest grid location from the coordinates of a pixel in the
+	 * interior of a square.
+	 * 
+	 * @param pixelLocation
+	 * @return
+	 */
+	public Point pixelToGrid(Point pixelLocation) {
+		int rowNum = 0;
+		int colNum = 0;
+		if (initialized) {
+			rowNum = (int) Math.round((pixelLocation.getY() - gridUpperLeft.getY()) / averageRowSpacing);
+			colNum = (int) Math.round((pixelLocation.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
+		}
+		Point result = new Point(rowNum, colNum);
+		return result;
 	}
 
 	public void removeSpace(int row, int col) {
@@ -243,6 +318,7 @@ public class GameBoard {
 		this.gridLocations = gridLocations;
 		convertToSquareArray();
 		setSquareIds();
+		initialized = true;
 	}
 
 	public void setSquareId(int row, int col, int id) {
@@ -347,5 +423,4 @@ public class GameBoard {
 		matcher.setImage(newImage);
 		setSquareIds();
 	}
-
 }

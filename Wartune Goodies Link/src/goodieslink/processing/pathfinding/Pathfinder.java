@@ -84,10 +84,10 @@ public class Pathfinder {
 				// set y location 1 above the grid
 				testPath.setCorner1(new Point(startPoint.x, -1));
 				testPath.setCorner2(new Point(endPoint.x, -1));
-			} else if (bendY == size.height) {
+			} else if (bendY == size.height - 1) {
 				// set y location 1 below the grid
-				testPath.setCorner1(new Point(startPoint.x, size.height + 1));
-				testPath.setCorner2(new Point(endPoint.x, size.height + 1));
+				testPath.setCorner1(new Point(startPoint.x, size.height));
+				testPath.setCorner2(new Point(endPoint.x, size.height));
 			} else {
 				testPath.setCorner1(new Point(startPoint.x, bendY));
 				testPath.setCorner2(new Point(endPoint.x, bendY));
@@ -104,10 +104,10 @@ public class Pathfinder {
 				// set y location 1 to the left of the grid
 				testPath.setCorner1(new Point(-1, startPoint.y));
 				testPath.setCorner2(new Point(-1, endPoint.y));
-			} else if (bendX == size.width) {
+			} else if (bendX == size.width - 1) {
 				// set y location 1 to the right of the grid
-				testPath.setCorner1(new Point(size.width + 1, startPoint.y));
-				testPath.setCorner2(new Point(size.width + 1, endPoint.y));
+				testPath.setCorner1(new Point(size.width, startPoint.y));
+				testPath.setCorner2(new Point(size.width, endPoint.y));
 			} else {
 				testPath.setCorner1(new Point(bendX, startPoint.y));
 				testPath.setCorner2(new Point(bendX, endPoint.y));
