@@ -15,6 +15,13 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+/**
+ * A simple window to assist in debugging, which allows the user to add a
+ * background image and a list of shapes to display on top of that image.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class SquareOverlay {
 
 	private JFrame mainWindow;
@@ -45,6 +52,13 @@ public class SquareOverlay {
 
 }
 
+/**
+ * An extension of ImagePanel that allows shapes to be drawn on top of the
+ * background image.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 class ShapePanel extends ImagePanel {
 	/**
 	 * 

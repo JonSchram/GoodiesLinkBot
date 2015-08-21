@@ -25,6 +25,15 @@ import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
 
+/**
+ * JUnit test case to confirm that game board icon IDs are correctly detected.
+ * This has been written, with the help of GenerateBoardTest, to be independent
+ * of the item ID assignment algorithm. This test will succeed as long as
+ * identical regions of the image have the same item ID.
+ * 
+ * @author jonathan
+ *
+ */
 public class TestAssignId {
 
 	@BeforeClass

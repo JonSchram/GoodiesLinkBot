@@ -6,6 +6,12 @@ import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+/**
+ * A simple window utilizing {@link ImagePanel} to assist in debugging.
+ * 
+ * @author jonathan
+ *
+ */
 public class ImagePreview {
 	private JFrame mainWindow;
 	private ImagePanel imagePanel;

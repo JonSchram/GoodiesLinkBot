@@ -7,12 +7,45 @@ import java.awt.image.DataBufferByte;
 import goodieslink.processing.Square;
 import goodieslink.ui.ImagePreview;
 
+/**
+ * Scans regions of an image and determines how similar the regions are, using
+ * any given {@link SimilarityMeasure}
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class RegionMatcher {
+	/**
+	 * Image that will be used for comparisons
+	 */
 	private BufferedImage image;
+	/**
+	 * Algorithm to measure similarity between individual pixels in the region
+	 */
 	private SimilarityMeasure measureAlgorithm;
+	/**
+	 * Maximum pixel shift that will be used when matching regions
+	 */
 	private int maxOffset;
+
+	/**
+	 * Pixel data from image, stored as a class variable to speed up repeated
+	 * calls to compute similarity
+	 */
 	byte[] pixels;
 
+	/**
+	 * Constructs a RegionMatcher with the given source image, similarity
+	 * algorithm and maximum pixel offset when matching squares
+	 * 
+	 * @param source
+	 *            Source image
+	 * @param similarityAlgorithm
+	 *            Algorithm used to compare pixels
+	 * @param pixelTolerance
+	 *            Maximum number of pixels to shift squares in an attempt to
+	 *            match regions
+	 */
 	public RegionMatcher(BufferedImage source, SimilarityMeasure similarityAlgorithm, int pixelTolerance) {
 		image = source;
 		measureAlgorithm = similarityAlgorithm;
@@ -20,6 +53,11 @@ public class RegionMatcher {
 		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
 	}
 
+	/**
+	 * Debug method to display which pixels have been scanned
+	 * 
+	 * @param pixels
+	 */
 	@SuppressWarnings("unused")
 	private void previewScan(byte[] pixels) {
 		BufferedImage bi = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
@@ -31,17 +69,28 @@ public class RegionMatcher {
 
 	}
 
+	/**
+	 * Changes source image
+	 * 
+	 * @param source
+	 *            New image for region detection
+	 */
 	public void setImage(BufferedImage source) {
+		// update image and remember to save updated pixel data
 		this.image = source;
 		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
 	}
 
 	/**
-	 * The lower the number, the closer the match. "0" is a perfect match
+	 * Best score for the similarity between two regions, shifting square 1
+	 * within the limit specified when the RegionMatcher was created. The lower
+	 * the number, the closer the match. "0" is a perfect match.
 	 * 
 	 * @param s1
+	 *            First region
 	 * @param s2
-	 * @return
+	 *            Second region
+	 * @return Number representing similarity between the two square regions
 	 */
 	public double similarity(Square s1, Square s2) {
 		// runs faster if the matcher doesn't get a new copy of pixel data each
@@ -57,7 +106,7 @@ public class RegionMatcher {
 		double newError;
 		for (int x = -maxOffset; x <= maxOffset; x++) {
 			for (int y = -maxOffset; y <= maxOffset; y++) {
-				newError = similarity(s1, s2, x, y, pixelSize, pixels);
+				newError = similarity(s1, s2, x, y, pixelSize);
 				if (newError < error) {
 					error = newError;
 				}
@@ -67,7 +116,26 @@ public class RegionMatcher {
 		return error;
 	}
 
-	private double similarity(Square s1, Square s2, int xOffset, int yOffset, int pixelSize, byte[] pixels) {
+	/**
+	 * Tests similarity between pixels within two squares. Specifies offsets to
+	 * shift square 1 such that small deviations relative to detected squares
+	 * will still be matched
+	 * 
+	 * @param s1
+	 *            First square
+	 * @param s2
+	 *            Second square
+	 * @param xOffset
+	 *            Offset in x direction from current position
+	 * @param yOffset
+	 *            Offset in y direction from current position
+	 * @param pixelSize
+	 *            Number of bytes per pixel, expected to be 3 or 4 for color
+	 *            images
+	 * @return Measure of the similarity of the square regions for these offset
+	 *         values
+	 */
+	private double similarity(Square s1, Square s2, int xOffset, int yOffset, int pixelSize) {
 		Rectangle s1Rect = new Rectangle(s1.getX() + xOffset, s1.getY() + yOffset, s1.getSideLength(),
 				s1.getSideLength());
 		Rectangle s2Rect = new Rectangle(s2.getX(), s2.getY(), s2.getSideLength(), s2.getSideLength());

@@ -9,13 +9,37 @@ import java.util.Set;
 
 import goodieslink.model.GameBoard;
 
+/**
+ * 
+ * Finds paths through the goodies link grid following the rule that two
+ * identical icons must be matched and the path between them can't cross grid
+ * spaces with an icon
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class Pathfinder {
+	/**
+	 * Game board storing icon information
+	 */
 	private GameBoard board;
 
+	/**
+	 * Constructs Pathfinder to find paths on the given board.
+	 * 
+	 * @param board
+	 *            Game board holding icon data
+	 */
 	public Pathfinder(GameBoard board) {
 		this.board = board;
 	}
 
+	/**
+	 * Finds and returns a valid path following the rules of the Goodies Link
+	 * game, or null if there are no paths.
+	 * 
+	 * @return A valid path, null if no paths exist
+	 */
 	public GoodiePath findPath() {
 		GoodiePath path = new GoodiePath();
 
@@ -57,6 +81,14 @@ public class Pathfinder {
 		return path;
 	}
 
+	/**
+	 * Gets all spaces in the game board with the same icon ID as the specified
+	 * ID
+	 * 
+	 * @param squareId
+	 *            Icon ID to match
+	 * @return All grid locations with this icon ID
+	 */
 	private Point[] getAllMatches(int squareId) {
 		ArrayList<Point> matches = new ArrayList<>();
 		Dimension boardSize = board.getSize();
@@ -70,6 +102,17 @@ public class Pathfinder {
 		return matches.toArray(new Point[matches.size()]);
 	}
 
+	/**
+	 * Attempts to get a path following Goodies Link rules connecting specified
+	 * grid locations
+	 * 
+	 * @param startPoint
+	 *            First grid location
+	 * @param endPoint
+	 *            Second grid location
+	 * @return A {@link GoodiePath} connecting the two grid locations, or null
+	 *         if no valid path exists for this pair of points
+	 */
 	private GoodiePath getPath(Point startPoint, Point endPoint) {
 
 		GoodiePath testPath = new GoodiePath(startPoint, endPoint);
@@ -123,6 +166,14 @@ public class Pathfinder {
 
 	}
 
+	/**
+	 * Determines whether this GoodiePath follows game rules (by not crossing
+	 * any other icon)
+	 * 
+	 * @param path
+	 *            Path to test
+	 * @return True if the path is valid, false otherwise
+	 */
 	private boolean isPathValid(GoodiePath path) {
 		boolean hasCollision = false;
 		Dimension size = board.getSize();

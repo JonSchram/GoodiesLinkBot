@@ -6,6 +6,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Short program that converts a 2D array of icon IDs into a set of
+ * assertEquals/assertNotEquals statements that can be pasted into TestAssignId.
+ * <br>
+ * I was lazy and just hardcoded in the list of IDs because this won't need to
+ * be run very much.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class GenerateBoardTest {
 
 	public static void main(String[] args) {

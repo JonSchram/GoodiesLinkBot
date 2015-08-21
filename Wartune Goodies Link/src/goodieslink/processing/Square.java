@@ -8,14 +8,43 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+/**
+ * Implementation of the {@link Shape} interface that represents a Square with 4
+ * sides of equal length.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class Square implements Shape {
+	/**
+	 * Implementation of {@link PathIterator} that returns successive vertices
+	 * of the representative {@link Shape} object.
+	 * 
+	 * @author Jonathan Schram
+	 *
+	 */
 	private class SquarePathIterator implements PathIterator {
+		/**
+		 * Which point should be returned on the next call to currentSegment()
+		 */
 		private int pointNum;
 		private int x;
 		private int y;
 		private int s;
 		private AffineTransform at;
 
+		/**
+		 * Initializes a {@link SquarePathIterator} with given dimensions
+		 * 
+		 * @param x
+		 *            X coordinate of square
+		 * @param y
+		 *            Y coordinate of square
+		 * @param s
+		 *            Side length
+		 * @param at
+		 *            {@link AffineTransform} applied to the square
+		 */
 		public SquarePathIterator(int x, int y, int s, AffineTransform at) {
 			pointNum = 0;
 			this.x = x;
@@ -99,6 +128,14 @@ public class Square implements Shape {
 		}
 	}
 
+	/**
+	 * Computes a square whose location and side length is the average of the
+	 * locations and side lengths of the squares in the list.
+	 * 
+	 * @param squares
+	 *            List of squares to average.
+	 * @return A square representing the average of all squares in the list.
+	 */
 	public static Square average(List<Square> squares) {
 		double sumX = 0;
 		double sumY = 0;
@@ -112,6 +149,15 @@ public class Square implements Shape {
 		return new Square((int) (sumX * scalar), (int) (sumY * scalar), (int) (sumSide * scalar));
 	}
 
+	/**
+	 * Computes the "distance" between the two squares, as if the square were a
+	 * representation of a 3D coordinate space, with sideLength as a third
+	 * spatial dimension
+	 * 
+	 * @param s1
+	 * @param s2
+	 * @return
+	 */
 	public static double difference(Square s1, Square s2) {
 		return Math
 				.sqrt(Math.pow(s1.x - s2.x, 2) + Math.pow(s1.y - s2.y, 2) + Math.pow(s1.sideLength - s2.sideLength, 2));
@@ -119,10 +165,21 @@ public class Square implements Shape {
 
 	private int x, y, sideLength;
 
+	/**
+	 * Creates a {@link Square} with default location at (0, 0) and side length
+	 * of 0
+	 */
 	public Square() {
 		this(0, 0, 0);
 	}
 
+	/**
+	 * Creates a square at the given location with given side length
+	 * 
+	 * @param x
+	 * @param y
+	 * @param sideLength
+	 */
 	public Square(int x, int y, int sideLength) {
 		this.x = x;
 		this.y = y;
@@ -189,14 +246,29 @@ public class Square implements Shape {
 		return new Rectangle2D.Double(x, y, sideLength, sideLength);
 	}
 
+	/**
+	 * Calculates the location of the center of the Square
+	 * 
+	 * @return The location of the center of the square
+	 */
 	public Point2D.Double getCenter() {
 		return new Point2D.Double(x + sideLength / 2.0, y + sideLength / 2.0);
 	}
 
+	/**
+	 * Calculates the x coordinate of the center of the square
+	 * 
+	 * @return
+	 */
 	public double getCenterX() {
 		return x + sideLength / 2.0;
 	}
 
+	/**
+	 * Calculates the y coordinate of the center of the square
+	 * 
+	 * @return
+	 */
 	public double getCenterY() {
 		return y + sideLength / 2.0;
 	}
@@ -211,14 +283,29 @@ public class Square implements Shape {
 		return getPathIterator(at);
 	}
 
+	/**
+	 * Gets the side length of the square
+	 * 
+	 * @return square side length
+	 */
 	public int getSideLength() {
 		return sideLength;
 	}
 
+	/**
+	 * Gets the x coordinate of the square
+	 * 
+	 * @return the x coordinate of the square
+	 */
 	public int getX() {
 		return x;
 	}
 
+	/**
+	 * Gets the y coordinate of the square
+	 * 
+	 * @return the y coordinate of the square
+	 */
 	public int getY() {
 		return y;
 	}

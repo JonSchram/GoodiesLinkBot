@@ -7,6 +7,13 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+/**
+ * Extension of a JPanel that supports rendering a background image as large as
+ * can fit in the panel.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 class ImagePanel extends JPanel {
 	/**
 		 * 
@@ -54,10 +61,8 @@ class ImagePanel extends JPanel {
 		int x = (getWidth() - imageWidth) / 2;
 		int y = (getHeight() - imageHeight) / 2;
 
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
 		g2.drawImage(displayImage, x, y, imageWidth, imageHeight, null);
 	}

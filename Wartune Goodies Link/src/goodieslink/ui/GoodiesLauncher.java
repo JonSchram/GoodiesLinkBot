@@ -13,6 +13,12 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+/**
+ * Performs initialization and begins UI
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class GoodiesLauncher {
 	public static void main(String[] args) {
 		// thanks to

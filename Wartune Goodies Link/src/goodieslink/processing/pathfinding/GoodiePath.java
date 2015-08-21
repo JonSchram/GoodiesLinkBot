@@ -4,11 +4,36 @@ import java.awt.Point;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Represents a path on the Goodies Link board connecting two grid locations.
+ * This class enforces the limitation that the path may have up to and including
+ * two corners.
+ * 
+ * @author Jonathan Schram
+ */
 public class GoodiePath implements Iterable<Point> {
+	/**
+	 * Iterator to return successive points on the game board including the
+	 * start and end points and every space in between
+	 * 
+	 * @author Jonathan Schram
+	 */
 	private class GoodiePathIterator implements Iterator<Point> {
+		/**
+		 * Start point of path
+		 */
 		private Point startPoint;
+		/**
+		 * End point of path
+		 */
 		private Point endPoint;
+		/**
+		 * First turning point on path, if it exists
+		 */
 		private Point corner1;
+		/**
+		 * Second turning point on path, if it exists
+		 */
 		private Point corner2;
 
 		/**
@@ -18,10 +43,22 @@ public class GoodiePath implements Iterable<Point> {
 		 */
 		private int segment;
 		/**
-		 * How boxes have been returned in current segment
+		 * How many boxes have been returned in current segment
 		 */
 		private int progress;
 
+		/**
+		 * Creates a GoodiePathIterator with the parameters of this GoodiePath
+		 * 
+		 * @param pStart
+		 *            Start point
+		 * @param corner1
+		 *            Corner 1
+		 * @param corner2
+		 *            Corner 2
+		 * @param pEnd
+		 *            End point
+		 */
 		public GoodiePathIterator(Point pStart, Point corner1, Point corner2, Point pEnd) {
 			this.startPoint = pStart;
 			this.endPoint = pEnd;
@@ -31,6 +68,17 @@ public class GoodiePath implements Iterable<Point> {
 			progress = 0;
 		}
 
+		/**
+		 * Move 1 grid space along the current segment of the path
+		 * 
+		 * @param p1
+		 *            Start point of current path segment
+		 * @param p2
+		 *            End point of current path segment
+		 * @param progress
+		 *            Current path progress
+		 * @return Next point on the path segment
+		 */
 		private Point advance(Point p1, Point p2, int progress) {
 			if (p1.x == p2.x) {
 				int direction = p1.y > p2.y ? -1 : 1;
@@ -120,25 +168,59 @@ public class GoodiePath implements Iterable<Point> {
 		}
 	}
 
+	/**
+	 * Start point of path
+	 */
 	private Point startPoint;
+	/**
+	 * End point of path
+	 */
 	private Point endPoint;
 
+	/**
+	 * First turning point of path, if it exists
+	 */
 	private Point corner1;
+	/**
+	 * Second turning point of path, if it exists
+	 */
 	private Point corner2;
 
+	/**
+	 * Constructs a default GoodiePath with start and end at (0,0) and with no
+	 * corners
+	 */
 	public GoodiePath() {
 		this(new Point(), new Point());
 	}
 
+	/**
+	 * Constructs a GoodiePath with given start and end point, with no corners
+	 * 
+	 * @param startPoint
+	 *            Start point of path
+	 * @param endPoint
+	 *            End point of path
+	 */
 	public GoodiePath(Point startPoint, Point endPoint) {
 		this.startPoint = startPoint;
 		this.endPoint = endPoint;
 	}
 
+	/**
+	 * Gets the end point of the path
+	 * 
+	 * @return Path end point
+	 */
 	public Point getEndPoint() {
 		return endPoint;
 	}
 
+	/**
+	 * Gets the start point of the path
+	 * 
+	 * @return Path start point
+	 */
 	public Point getStartPoint() {
 		return startPoint;
 	}
@@ -148,26 +230,52 @@ public class GoodiePath implements Iterable<Point> {
 		return new GoodiePathIterator(startPoint, corner1, corner2, endPoint);
 	}
 
+	/**
+	 * Sets corner 1. Will not be set if the corner equals the start point or
+	 * corner 2
+	 * 
+	 * @param corner
+	 *            Point which will be a corner
+	 */
 	public void setCorner1(Point corner) {
-		if (!startPoint.equals(corner)) {
+		if (!startPoint.equals(corner) && (corner2 != null && !corner2.equals(corner))) {
 			corner1 = corner;
 		} else {
 			corner1 = null;
 		}
 	}
 
+	/**
+	 * Sets corner 2. Will not be set if the corner equals the end point or
+	 * corner1
+	 * 
+	 * @param corner
+	 *            Path which will be the second corner.
+	 */
 	public void setCorner2(Point corner) {
-		if (!endPoint.equals(corner)) {
+		if (!endPoint.equals(corner) && (corner1 != null && !corner1.equals(corner))) {
 			corner2 = corner;
 		} else {
 			corner2 = null;
 		}
 	}
 
+	/**
+	 * Sets the end point
+	 * 
+	 * @param endPoint
+	 *            New path end point
+	 */
 	public void setEndPoint(Point endPoint) {
 		this.endPoint = endPoint;
 	}
 
+	/**
+	 * Sets the start point
+	 * 
+	 * @param startPoint
+	 *            New path start point
+	 */
 	public void setStartPoint(Point startPoint) {
 		this.startPoint = startPoint;
 	}

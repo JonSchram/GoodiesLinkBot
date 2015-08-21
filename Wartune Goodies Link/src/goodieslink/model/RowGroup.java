@@ -7,11 +7,36 @@ import java.util.Iterator;
 
 import goodieslink.processing.Square;
 
+/**
+ * 
+ * SquareGrouping representing a group of squares aligned in the same row in a
+ * grid
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class RowGroup extends SquareGrouping {
+	/**
+	 * Maximum deviation from column alignment when determing whether to add
+	 * another square to the group
+	 */
 	private int tolerance;
+	/**
+	 * Sum of all square y-coordinates
+	 */
 	private int ySum;
+	/**
+	 * Number of squares in the group
+	 */
 	private int count;
 
+	/**
+	 * Creates a new RowGroup with specified tolerance
+	 * 
+	 * @param tolerance
+	 *            Maximum difference in average column center and new square
+	 *            center when determining if a square belongs to the group
+	 */
 	public RowGroup(int tolerance) {
 		this.tolerance = tolerance;
 		ySum = 0;
@@ -50,6 +75,11 @@ public class RowGroup extends SquareGrouping {
 		return false;
 	}
 
+	/**
+	 * Computes average of y-coordinates of squares in this row
+	 * 
+	 * @return
+	 */
 	private double averageY() {
 		if (count != 0) {
 			return (double) ySum / count;

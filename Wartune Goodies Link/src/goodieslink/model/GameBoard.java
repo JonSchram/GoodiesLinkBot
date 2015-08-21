@@ -21,12 +21,35 @@ import goodieslink.processing.matching.DifferenceSquaredMeasure;
 import goodieslink.processing.matching.RegionMatcher;
 import goodieslink.processing.matching.SimilarityResult;
 
+/**
+ * Converts square pixel location to locations on a rectangular grid, and stores
+ * the icon ID values for this grid.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class GameBoard {
 	// private BufferedImage sourceImage;
+	/**
+	 * A list of squares to be converted to a grid
+	 */
 	private List<Square> gridLocations;
+	/**
+	 * 2D array storing icon IDs to determine which grid locations contain
+	 * matching icons
+	 */
 	private int[][] iconIds;
+	/**
+	 * 2D array storing the actual Squares detected in the source image
+	 */
 	private Square[][] squareLocations;
+	/**
+	 * RegionMatcher that will be used to determine which squares are similar
+	 */
 	private RegionMatcher matcher;
+	/**
+	 * Similarity score required to identify two squares as similar
+	 */
 	private double similarityThreshold;
 
 	/**
@@ -70,6 +93,21 @@ public class GameBoard {
 	 */
 	private int tolerance;
 
+	/**
+	 * Creates a new game board with specified parameters
+	 * 
+	 * @param sourceImage
+	 *            Image of game grid
+	 * @param locationTolerance
+	 *            Maximum difference between squares before they are no longer
+	 *            considered in the same row/column
+	 * @param searchMargin
+	 *            Maximum number of pixels to shift search regions to find a
+	 *            matching icon
+	 * @param similarityThreshold
+	 *            Similarity score required for two icons to be considered
+	 *            identical. Must be positive. Closer to 0 is a closer match.
+	 */
 	public GameBoard(BufferedImage sourceImage, int locationTolerance, int searchMargin, double similarityThreshold) {
 		// this.sourceImage = sourceImage;
 		this.tolerance = locationTolerance;
@@ -77,6 +115,10 @@ public class GameBoard {
 		this.similarityThreshold = similarityThreshold;
 	}
 
+	/**
+	 * Takes the list of squares and determines which grid location it would be
+	 * in
+	 */
 	private void convertToSquareArray() {
 		ArrayList<RowGroup> rows = new ArrayList<>();
 		ArrayList<ColumnGroup> cols = new ArrayList<>();
@@ -114,6 +156,13 @@ public class GameBoard {
 
 	}
 
+	/**
+	 * Finds average spacing between squares in the SquareGrouping
+	 * 
+	 * @param squareGroups
+	 *            List of groups in which to search for an average spacing
+	 * @return
+	 */
 	private double findAverageSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
 		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
 		if (groupIterator.hasNext()) {
@@ -137,6 +186,13 @@ public class GameBoard {
 		}
 	}
 
+	/**
+	 * Finds the maximum square location in the list of square groups
+	 * 
+	 * @param squareGroups
+	 *            List to search
+	 * @return
+	 */
 	private Point2D.Double findMax(ArrayList<? extends SquareGrouping> squareGroups) {
 		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
 		SquareGrouping group = groupIterator.next();
@@ -156,6 +212,13 @@ public class GameBoard {
 		return new Point2D.Double(maxX, maxY);
 	}
 
+	/**
+	 * Finds the minimum square location in the list
+	 * 
+	 * @param squareGroups
+	 *            List to search
+	 * @return
+	 */
 	private Point2D.Double findMin(ArrayList<? extends SquareGrouping> squareGroups) {
 		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
 		SquareGrouping group = groupIterator.next();
@@ -175,6 +238,18 @@ public class GameBoard {
 		return new Point2D.Double(minX, minY);
 	}
 
+	/**
+	 * Find minimum spacing between square groups.<br>
+	 * Deprecated because this can cause serious problems in grid detection,
+	 * since a few pixel difference in the minimum will have a big effect on
+	 * grid locations at extreme ends of the game board
+	 * 
+	 * @param squareGroups
+	 *            List of groups to search
+	 * @return
+	 * 
+	 * @deprecated
+	 */
 	@SuppressWarnings("unused")
 	private double findMinSpacing(ArrayList<? extends SquareGrouping> squareGroups) {
 		Iterator<? extends SquareGrouping> groupIterator = squareGroups.iterator();
@@ -193,6 +268,16 @@ public class GameBoard {
 		}
 	}
 
+	/**
+	 * Converts the list of the game board's squares into a list of rows and
+	 * columns, using lists <code>rows</code> and <code>cols</code> as output
+	 * variables
+	 * 
+	 * @param rows
+	 *            Output variable for list of row groups
+	 * @param cols
+	 *            Output variable for list of column groups
+	 */
 	private void getRowColumnList(ArrayList<RowGroup> rows, ArrayList<ColumnGroup> cols) {
 		Iterator<Square> squareIterator = gridLocations.iterator();
 		while (squareIterator.hasNext()) {
@@ -233,6 +318,11 @@ public class GameBoard {
 		}
 	}
 
+	/**
+	 * Gets size of game board
+	 * 
+	 * @return A Dimension representing game board size
+	 */
 	public Dimension getSize() {
 		int width;
 		int height;
@@ -246,6 +336,15 @@ public class GameBoard {
 		return new Dimension(width, height);
 	}
 
+	/**
+	 * Returns the icon ID for the specified square
+	 * 
+	 * @param row
+	 *            Row number
+	 * @param col
+	 *            Column number
+	 * @return Icon ID of square located at row and column
+	 */
 	public int getSquareId(int row, int col) {
 		if (iconIds != null) {
 			if (row >= 0 && row < iconIds.length) {
@@ -275,6 +374,12 @@ public class GameBoard {
 		return result;
 	}
 
+	/**
+	 * Returns whether this GameBoard has analyzed a set of squares and detected
+	 * a grid with icons
+	 * 
+	 * @return
+	 */
 	public boolean isInitialized() {
 		return initialized;
 	}
@@ -297,6 +402,14 @@ public class GameBoard {
 		return result;
 	}
 
+	/**
+	 * Removes a square from the game board's grid
+	 * 
+	 * @param row
+	 *            Row number
+	 * @param col
+	 *            Column number
+	 */
 	public void removeSpace(int row, int col) {
 		if (iconIds != null) {
 			if (row >= 0 && row < iconIds.length) {
@@ -310,10 +423,23 @@ public class GameBoard {
 		}
 	}
 
+	/**
+	 * Removes a square from the game board grid at specified point
+	 * 
+	 * @param space
+	 *            Location of grid space to remove
+	 */
 	public void removeSpace(Point space) {
 		removeSpace(space.y, space.x);
 	}
 
+	/**
+	 * Assigns a new set of squares to the game board and processes image using
+	 * these squares
+	 * 
+	 * @param gridLocations
+	 *            List of squares where icons are located
+	 */
 	public void setGridLocations(List<Square> gridLocations) {
 		this.gridLocations = gridLocations;
 		convertToSquareArray();
@@ -321,6 +447,16 @@ public class GameBoard {
 		initialized = true;
 	}
 
+	/**
+	 * Sets icon ID of the specified grid location to the specified ID
+	 * 
+	 * @param row
+	 *            Row number of icon
+	 * @param col
+	 *            Column number of icon
+	 * @param id
+	 *            New icon ID for this grid location
+	 */
 	public void setSquareId(int row, int col, int id) {
 		if (iconIds != null) {
 			if (row >= 0 && row < iconIds.length) {
@@ -331,6 +467,10 @@ public class GameBoard {
 		}
 	}
 
+	/**
+	 * Uses source image and square location mapping to determine which icons
+	 * are similar
+	 */
 	private void setSquareIds() {
 		int nextID = 1;
 		// HashSet<Integer> nonMatchingIcons = new HashSet<>();
@@ -418,6 +558,12 @@ public class GameBoard {
 		}
 	}
 
+	/**
+	 * Assigns a new image and triggers re-assigning icon IDs
+	 * 
+	 * @param newImage
+	 *            New source image
+	 */
 	public void updateBoardState(BufferedImage newImage) {
 		// sourceImage = newImage;
 		matcher.setImage(newImage);

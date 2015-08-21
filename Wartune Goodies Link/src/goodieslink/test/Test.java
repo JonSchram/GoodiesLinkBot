@@ -21,7 +21,16 @@ import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.SquareOverlay;
+import nu.pattern.OpenCV;
 
+/**
+ * 
+ * Test class created to verify (visually) that image processing works properly,
+ * and later to see how long each step takes.
+ * 
+ * @author Jonathan Schram
+ *
+ */
 public class Test {
 	public static void main(String[] args) {
 		nu.pattern.OpenCV.loadShared();
@@ -89,6 +98,23 @@ public class Test {
 
 	}
 
+	/**
+	 * Method to allow an OpenCV image matrix to be converted to a
+	 * {@link BufferedImage}.
+	 * <p>
+	 * Adapted from answer by stack overflow user
+	 * <a href="http://stackoverflow.com/users/1297062/dannyxyz22">http://
+	 * stackoverflow.com/users/1297062/dannyxyz22</a>
+	 * </p>
+	 * question URL at: <a href=
+	 * "http://stackoverflow.com/questions/15670933/opencv-java-load-image-to-gui">
+	 * http://stackoverflow.com/questions/15670933/opencv-java-load-image-to-gui
+	 * </a>
+	 * 
+	 * @param m
+	 *            Matrix to convert
+	 * @return Matrix data in a buffered image
+	 */
 	public static BufferedImage toBufferedImage(Mat m) {
 		int type = BufferedImage.TYPE_BYTE_GRAY;
 		if (m.channels() > 1) {
