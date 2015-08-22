@@ -50,7 +50,8 @@ public class ColumnGroup extends SquareGrouping {
 	}
 
 	@Override
-	public ArrayList<Square> getSorted() {
+	public void sort() {
+		super.sort();
 		ArrayList<Square> squares = getList();
 		squares.sort(new Comparator<Square>() {
 			@Override
@@ -63,7 +64,6 @@ public class ColumnGroup extends SquareGrouping {
 				return 0;
 			}
 		});
-		return squares;
 	}
 
 	@Override

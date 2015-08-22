@@ -1,7 +1,6 @@
 package goodieslink.ui;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 
@@ -12,6 +11,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+
+import goodieslink.ImageDataUtils;
 
 /**
  * Performs initialization and begins UI
@@ -62,7 +63,7 @@ public class GoodiesLauncher {
 
 			Imgproc.blur(imageMat, imageMat, new Size(1, 1));
 			Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_RGBA2GRAY);
-			ImagePreview ip = new ImagePreview(toBufferedImage(imageMat));
+			ImagePreview ip = new ImagePreview(ImageDataUtils.toBufferedImage(imageMat));
 
 			ip.show();
 			long startOpenCV, endOpenCV;
@@ -71,7 +72,7 @@ public class GoodiesLauncher {
 			endOpenCV = System.nanoTime();
 			System.out.println("OpenCV : " + (endOpenCV - startOpenCV) / 1000000. + " ms");
 			Highgui.imwrite("edge image OpenCV.png", imageMat);
-			BufferedImage openCvImage = toBufferedImage(imageMat);
+			BufferedImage openCvImage = ImageDataUtils.toBufferedImage(imageMat);
 			ImagePreview cvWindow = new ImagePreview(openCvImage);
 
 			// ImagePreview cvWindow = new ImagePreview(ImageIO.read(new File(
@@ -81,29 +82,6 @@ public class GoodiesLauncher {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-	}
-
-	/**
-	 * From user http://stackoverflow.com/users/1297062/dannyxyz22
-	 * 
-	 * http://stackoverflow.com/questions/15670933/opencv-java-load-image-to-gui
-	 * 
-	 * @param m
-	 * @return
-	 */
-	public static BufferedImage toBufferedImage(Mat m) {
-		int type = BufferedImage.TYPE_BYTE_GRAY;
-		if (m.channels() > 1) {
-			type = BufferedImage.TYPE_3BYTE_BGR;
-		}
-		int bufferSize = m.channels() * m.cols() * m.rows();
-		byte[] b = new byte[bufferSize];
-		m.get(0, 0, b); // get all the pixels
-		BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(b, 0, targetPixels, 0, b.length);
-		return image;
 
 	}
 

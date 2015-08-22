@@ -1,11 +1,10 @@
 package goodieslink.processing.hough;
 
-import goodieslink.processing.Square;
-import goodieslink.ui.ImagePreview;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.List;
+
+import goodieslink.processing.Square;
 
 /**
  * Processes an image and finds the locations of squares in the image. Squares
@@ -214,23 +213,6 @@ public class SquareTransform {
 	 */
 	public List<Square> getBoxes(double thresholdProportion, PeakFilter<Square> filter) {
 		return acc.consolidate(acc.getPeaks(thresholdProportion), filter);
-	}
-
-	/**
-	 * debug method to view the pixels that were scanned, which was accomplished
-	 * by modifying the scan procedure to change the pixel data
-	 * 
-	 * @param pixels
-	 */
-	@SuppressWarnings("unused")
-	private void previewScan(byte[] pixels) {
-		BufferedImage bi = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-		byte[] rasterData = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-		System.arraycopy(pixels, 0, rasterData, 0, pixels.length);
-
-		ImagePreview ip = new ImagePreview(bi);
-		ip.show();
-
 	}
 
 }

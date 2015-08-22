@@ -57,6 +57,14 @@ public class GameBoard {
 	 */
 	private boolean initialized;
 	/**
+	 * Whether this object has been assigned a source image
+	 */
+	private boolean hasImage;
+	/**
+	 * Whether this object has been assigned detected squares
+	 */
+	private boolean hasSquares;
+	/**
 	 * Location of square (in pixel coordinates) in the upper left corner of the
 	 * game board.<br>
 	 * There is not necessarily a square in this location, but is the location
@@ -113,6 +121,127 @@ public class GameBoard {
 		this.tolerance = locationTolerance;
 		this.matcher = new RegionMatcher(sourceImage, new DifferenceSquaredMeasure(), searchMargin);
 		this.similarityThreshold = similarityThreshold;
+		initialized = false;
+		hasImage = true;
+		hasSquares = false;
+	}
+
+	/**
+	 * Creates a new game board with no initial image
+	 * 
+	 * @param locationTolerance
+	 *            Maximum difference between squares before they are no longer
+	 *            considered in the same row/column
+	 * @param searchMargin
+	 *            Maximum number of pixels to shift search regions to find a
+	 *            matching icon
+	 * @param similarityThreshold
+	 *            Similarity score required for two icons to be considered
+	 *            identical. Must be positive. Closer to 0 is a closer match.
+	 */
+	public GameBoard(int locationTolerance, int searchMargin, double similarityThreshold) {
+		this.tolerance = locationTolerance;
+		this.matcher = new RegionMatcher(new DifferenceSquaredMeasure(), searchMargin);
+		this.similarityThreshold = similarityThreshold;
+		initialized = false;
+		hasImage = false;
+		hasSquares = false;
+	}
+
+	/**
+	 * Uses source image and square location mapping to determine which icons
+	 * are similar
+	 */
+	private void computeSquareIds() {
+		if (hasSquares && hasImage) {
+			int nextID = 1;
+			// HashSet<Integer> nonMatchingIcons = new HashSet<>();
+			Set<Integer> nonMatchingIcons = Collections.synchronizedSet(new HashSet<Integer>());
+
+			int numOfCores = Runtime.getRuntime().availableProcessors();
+			ExecutorService pool = Executors.newFixedThreadPool(numOfCores);
+			// ExecutorService pool = Executors.newCachedThreadPool();
+			List<Future<SimilarityResult>> futures = new LinkedList<>();
+			// for each square
+			for (int row = 0; row < iconIds.length; row++) {
+				for (int col = 0; col < iconIds[row].length; col++) {
+					if (squareLocations[row][col] != null) {
+						nonMatchingIcons.clear();
+						// is a valid square
+						// compare square to all in rows above current
+						for (int i = 0; i < row && iconIds[row][col] == 0; i++) {
+							for (int j = 0; j < iconIds[i].length && iconIds[row][col] == 0; j++) {
+								// don't bother checking similarity if that icon
+								// has
+								// been checked
+								if (!nonMatchingIcons.contains(iconIds[i][j])) {
+									Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(i, j),
+											new Point(row, col), iconIds[i][j], squareLocations[row][col],
+											squareLocations[i][j], matcher, nonMatchingIcons));
+									futures.add(future);
+									// double similarity =
+									// matcher.similarity(squareLocations[row][col],
+									// squareLocations[i][j]);
+									// if (similarity < similarityThreshold) {
+									// iconIds[row][col] = iconIds[i][j];
+									// } else {
+									// nonMatchingIcons.add(iconIds[i][j]);
+									// }
+								}
+							}
+						}
+						// compare square to all those to the left in same row
+						for (int j = 0; j < col && iconIds[row][col] == 0; j++) {
+							if (!nonMatchingIcons.contains(iconIds[row][j])) {
+								Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(row, j),
+										new Point(row, col), iconIds[row][j], squareLocations[row][col],
+										squareLocations[row][j], matcher, nonMatchingIcons));
+								futures.add(future);
+								// double similarity =
+								// matcher.similarity(squareLocations[row][col],
+								// squareLocations[row][j]);
+								// if (similarity < similarityThreshold) {
+								// iconIds[row][col] = iconIds[row][j];
+								// } else {
+								// nonMatchingIcons.add(iconIds[row][j]);
+								// }
+							}
+						}
+						boolean foundSimilar = false;
+						for (Future<SimilarityResult> f : futures) {
+							if (!foundSimilar) {
+								SimilarityResult sr;
+								try {
+									sr = f.get();
+									if (sr.getSimilarity() < similarityThreshold) {
+										foundSimilar = true;
+										Point dest = sr.getDest();
+										iconIds[dest.x][dest.y] = sr.getSourceValue();
+									} else {
+										nonMatchingIcons.add(sr.getSourceValue());
+									}
+								} catch (InterruptedException | ExecutionException e) {
+									e.printStackTrace();
+								}
+							} else {
+								f.cancel(false);
+							}
+							// futureIterator.remove();
+						}
+						futures.clear();
+						if (iconIds[row][col] == 0) {
+							// no match has been found and it is end of search
+							iconIds[row][col] = nextID++;
+						}
+						// end comparisons
+					}
+					// end matching a valid square
+
+				}
+			}
+		} else {
+			throw new NullPointerException("Can't compute square IDs, no image or no squares");
+		}
 	}
 
 	/**
@@ -120,38 +249,44 @@ public class GameBoard {
 	 * in
 	 */
 	private void convertToSquareArray() {
-		ArrayList<RowGroup> rows = new ArrayList<>();
-		ArrayList<ColumnGroup> cols = new ArrayList<>();
-		getRowColumnList(rows, cols);
+		if (hasSquares) {
 
-		for (RowGroup row : rows) {
-			row.sort();
-		}
-		for (ColumnGroup col : cols) {
-			col.sort();
-		}
+			ArrayList<RowGroup> rows = new ArrayList<>();
+			ArrayList<ColumnGroup> cols = new ArrayList<>();
+			getRowColumnList(rows, cols);
 
-		// minimum space between squares in adjacent columns
-		// double minColumnSpacing = findMinSpacing(rows);
-		averageColumnSpacing = findAverageSpacing(rows);
-		// minimum space between squares in adjacent rows
-		// double minRowSpacing = findMinSpacing(cols);
-		averageRowSpacing = findAverageSpacing(cols);
+			for (RowGroup row : rows) {
+				row.sort();
+			}
+			for (ColumnGroup col : cols) {
+				col.sort();
+			}
 
-		// only have to search rows for min because both rows and cols contain
-		// all squares
-		gridUpperLeft = findMin(rows);
-		gridLowerRight = findMax(rows);
-		gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
-		gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
+			// minimum space between squares in adjacent columns
+			// double minColumnSpacing = findMinSpacing(rows);
+			averageColumnSpacing = findAverageSpacing(rows);
+			// minimum space between squares in adjacent rows
+			// double minRowSpacing = findMinSpacing(cols);
+			averageRowSpacing = findAverageSpacing(cols);
 
-		iconIds = new int[gridHeight][gridWidth];
-		squareLocations = new Square[gridHeight][gridWidth];
+			// only have to search rows for min because both rows and cols
+			// contain
+			// all squares
+			gridUpperLeft = findMin(rows);
+			gridLowerRight = findMax(rows);
+			gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
+			gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
 
-		for (Square s : gridLocations) {
-			int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
-			int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
-			squareLocations[rowNum][colNum] = s;
+			iconIds = new int[gridHeight][gridWidth];
+			squareLocations = new Square[gridHeight][gridWidth];
+
+			for (Square s : gridLocations) {
+				int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
+				int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
+				squareLocations[rowNum][colNum] = s;
+			}
+		} else {
+			throw new NullPointerException("No squares, can't convert to grid");
 		}
 
 	}
@@ -268,6 +403,14 @@ public class GameBoard {
 		}
 	}
 
+	public int getGridHeight() {
+		return gridHeight;
+	}
+
+	public int getGridWidth() {
+		return gridWidth;
+	}
+
 	/**
 	 * Converts the list of the game board's squares into a list of rows and
 	 * columns, using lists <code>rows</code> and <code>cols</code> as output
@@ -375,6 +518,25 @@ public class GameBoard {
 	}
 
 	/**
+	 * Determines whether the game board has been cleared of squares
+	 * 
+	 * @return True if there is at least one square, false otherwise
+	 */
+	public boolean isEmpty() {
+		boolean hasSquare = false;
+		if (initialized) {
+			for (int i = 0; i < gridHeight && !hasSquare; i++) {
+				for (int j = 0; j < gridWidth && !hasSquare; j++) {
+					if (iconIds[i][j] != 0) {
+						hasSquare = true;
+					}
+				}
+			}
+		}
+		return !hasSquare;
+	}
+
+	/**
 	 * Returns whether this GameBoard has analyzed a set of squares and detected
 	 * a grid with icons
 	 * 
@@ -442,9 +604,27 @@ public class GameBoard {
 	 */
 	public void setGridLocations(List<Square> gridLocations) {
 		this.gridLocations = gridLocations;
+		hasSquares = true;
 		convertToSquareArray();
-		setSquareIds();
+		computeSquareIds();
 		initialized = true;
+	}
+
+	/**
+	 * Assigns a new image and triggers re-assigning icon IDs
+	 * 
+	 * @param newImage
+	 *            New source image
+	 */
+	public void setImage(BufferedImage newImage) {
+		// sourceImage = newImage;
+		matcher.setImage(newImage);
+		hasImage = true;
+		computeSquareIds();
+	}
+
+	public void setSimilarityThreshold(double similarityThreshold) {
+		this.similarityThreshold = similarityThreshold;
 	}
 
 	/**
@@ -467,106 +647,8 @@ public class GameBoard {
 		}
 	}
 
-	/**
-	 * Uses source image and square location mapping to determine which icons
-	 * are similar
-	 */
-	private void setSquareIds() {
-		int nextID = 1;
-		// HashSet<Integer> nonMatchingIcons = new HashSet<>();
-		Set<Integer> nonMatchingIcons = Collections.synchronizedSet(new HashSet<Integer>());
-
-		int numOfCores = Runtime.getRuntime().availableProcessors();
-		ExecutorService pool = Executors.newFixedThreadPool(numOfCores);
-		// ExecutorService pool = Executors.newCachedThreadPool();
-		List<Future<SimilarityResult>> futures = new LinkedList<>();
-		// for each square
-		for (int row = 0; row < iconIds.length; row++) {
-			for (int col = 0; col < iconIds[row].length; col++) {
-				if (squareLocations[row][col] != null) {
-					nonMatchingIcons.clear();
-					// is a valid square
-					// compare square to all in rows above current
-					for (int i = 0; i < row && iconIds[row][col] == 0; i++) {
-						for (int j = 0; j < iconIds[i].length && iconIds[row][col] == 0; j++) {
-							// don't bother checking similarity if that icon has
-							// been checked
-							if (!nonMatchingIcons.contains(iconIds[i][j])) {
-								Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(i, j),
-										new Point(row, col), iconIds[i][j], squareLocations[row][col],
-										squareLocations[i][j], matcher, nonMatchingIcons));
-								futures.add(future);
-								// double similarity =
-								// matcher.similarity(squareLocations[row][col],
-								// squareLocations[i][j]);
-								// if (similarity < similarityThreshold) {
-								// iconIds[row][col] = iconIds[i][j];
-								// } else {
-								// nonMatchingIcons.add(iconIds[i][j]);
-								// }
-							}
-						}
-					}
-					// compare square to all those to the left in same row
-					for (int j = 0; j < col && iconIds[row][col] == 0; j++) {
-						if (!nonMatchingIcons.contains(iconIds[row][j])) {
-							Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(row, j),
-									new Point(row, col), iconIds[row][j], squareLocations[row][col],
-									squareLocations[row][j], matcher, nonMatchingIcons));
-							futures.add(future);
-							// double similarity =
-							// matcher.similarity(squareLocations[row][col],
-							// squareLocations[row][j]);
-							// if (similarity < similarityThreshold) {
-							// iconIds[row][col] = iconIds[row][j];
-							// } else {
-							// nonMatchingIcons.add(iconIds[row][j]);
-							// }
-						}
-					}
-					boolean foundSimilar = false;
-					for (Future<SimilarityResult> f : futures) {
-						if (!foundSimilar) {
-							SimilarityResult sr;
-							try {
-								sr = f.get();
-								if (sr.getSimilarity() < similarityThreshold) {
-									foundSimilar = true;
-									Point dest = sr.getDest();
-									iconIds[dest.x][dest.y] = sr.getSourceValue();
-								} else {
-									nonMatchingIcons.add(sr.getSourceValue());
-								}
-							} catch (InterruptedException | ExecutionException e) {
-								e.printStackTrace();
-							}
-						} else {
-							f.cancel(false);
-						}
-						// futureIterator.remove();
-					}
-					futures.clear();
-					if (iconIds[row][col] == 0) {
-						// no match has been found and it is end of search
-						iconIds[row][col] = nextID++;
-					}
-					// end comparisons
-				}
-				// end matching a valid square
-
-			}
-		}
+	public void setTolerance(int tolerance) {
+		this.tolerance = tolerance;
 	}
 
-	/**
-	 * Assigns a new image and triggers re-assigning icon IDs
-	 * 
-	 * @param newImage
-	 *            New source image
-	 */
-	public void updateBoardState(BufferedImage newImage) {
-		// sourceImage = newImage;
-		matcher.setImage(newImage);
-		setSquareIds();
-	}
 }

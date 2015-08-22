@@ -20,6 +20,7 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+import goodieslink.ImageDataUtils;
 import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
@@ -54,7 +55,7 @@ public class TestAssignId {
 			Imgproc.blur(imageMat, imageMat, new Size(1, 1));
 			Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_RGBA2GRAY);
 			Imgproc.Canny(imageMat, imageMat, 50, 150, 3, false);
-			BufferedImage edgeImage = toBufferedImage(imageMat);
+			BufferedImage edgeImage = ImageDataUtils.toBufferedImage(imageMat);
 
 			// one square will be too big
 			SquareTransform st = new SquareTransform(edgeImage, 19, 23);
@@ -148,16 +149,4 @@ public class TestAssignId {
 			e.printStackTrace();
 		}
 	}
-
-	public static BufferedImage toBufferedImage(Mat m) {
-		int type = BufferedImage.TYPE_BYTE_GRAY;
-		if (m.channels() > 1) {
-			type = BufferedImage.TYPE_3BYTE_BGR;
-		}
-		BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
-		byte[] b = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		m.get(0, 0, b);
-		return image;
-	}
-
 }

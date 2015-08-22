@@ -35,28 +35,20 @@ public abstract class SquareGrouping implements Iterable<Square> {
 	}
 
 	/**
-	 * Returns a copy of the list of squares in this group
+	 * Returns a reference to the list of squares in this group
 	 * 
 	 * @return
 	 */
 	public ArrayList<Square> getList() {
-		return new ArrayList<>(group);
+		return group;
 	}
 
 	/**
 	 * Sort the group and overwrite the original group with the sorted version
 	 */
 	public void sort() {
-		group = getSorted();
 		sorted = true;
 	}
-
-	/**
-	 * Return a sorted version of the group, but don't modify the group
-	 * 
-	 * @return Sorted group data
-	 */
-	public abstract ArrayList<Square> getSorted();
 
 	/**
 	 * Adds a new square to the group

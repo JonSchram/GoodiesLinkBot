@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
 import goodieslink.processing.Square;
-import goodieslink.ui.ImagePreview;
 
 /**
  * Scans regions of an image and determines how similar the regions are, using
@@ -35,6 +34,11 @@ public class RegionMatcher {
 	byte[] pixels;
 
 	/**
+	 * Whether this matcher has an image associated with it
+	 */
+	boolean initialized;
+
+	/**
 	 * Constructs a RegionMatcher with the given source image, similarity
 	 * algorithm and maximum pixel offset when matching squares
 	 * 
@@ -51,22 +55,13 @@ public class RegionMatcher {
 		measureAlgorithm = similarityAlgorithm;
 		maxOffset = pixelTolerance;
 		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
+		initialized = true;
 	}
 
-	/**
-	 * Debug method to display which pixels have been scanned
-	 * 
-	 * @param pixels
-	 */
-	@SuppressWarnings("unused")
-	private void previewScan(byte[] pixels) {
-		BufferedImage bi = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-		byte[] rasterData = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-		System.arraycopy(pixels, 0, rasterData, 0, pixels.length);
-
-		ImagePreview ip = new ImagePreview(bi);
-		ip.show();
-
+	public RegionMatcher(SimilarityMeasure similarityAlgorithm, int pixelTolerance) {
+		measureAlgorithm = similarityAlgorithm;
+		maxOffset = pixelTolerance;
+		initialized = false;
 	}
 
 	/**
@@ -79,6 +74,7 @@ public class RegionMatcher {
 		// update image and remember to save updated pixel data
 		this.image = source;
 		pixels = ((DataBufferByte) image.getData().getDataBuffer()).getData();
+		initialized = true;
 	}
 
 	/**
@@ -93,27 +89,30 @@ public class RegionMatcher {
 	 * @return Number representing similarity between the two square regions
 	 */
 	public double similarity(Square s1, Square s2) {
-		// runs faster if the matcher doesn't get a new copy of pixel data each
-		// call
-		// byte[] pixels = ((DataBufferByte)
-		// image.getData().getDataBuffer()).getData();
-		int pixelSize = image.getColorModel().getNumComponents();
+		if (initialized) {
+			// runs faster if the matcher doesn't get a new copy of
+			// pixel data each call
+			// byte[] pixels = ((DataBufferByte)
+			// image.getData().getDataBuffer()).getData();
+			int pixelSize = image.getColorModel().getNumComponents();
 
-		// attempt to match the image with every possible horizontal and
-		// vertical shift
-		// initialize error to infinity, meaning no match
-		double error = Double.POSITIVE_INFINITY;
-		double newError;
-		for (int x = -maxOffset; x <= maxOffset; x++) {
-			for (int y = -maxOffset; y <= maxOffset; y++) {
-				newError = similarity(s1, s2, x, y, pixelSize);
-				if (newError < error) {
-					error = newError;
+			// attempt to match the image with every possible horizontal and
+			// vertical shift
+			// initialize error to infinity, meaning no match
+			double error = Double.POSITIVE_INFINITY;
+			double newError;
+			for (int x = -maxOffset; x <= maxOffset; x++) {
+				for (int y = -maxOffset; y <= maxOffset; y++) {
+					newError = similarity(s1, s2, x, y, pixelSize);
+					if (newError < error) {
+						error = newError;
+					}
 				}
 			}
+			return error;
 		}
+		throw new NullPointerException("No image to compute region similarity");
 
-		return error;
 	}
 
 	/**

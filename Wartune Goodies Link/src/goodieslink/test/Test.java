@@ -1,7 +1,6 @@
 package goodieslink.test;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+import goodieslink.ImageDataUtils;
 import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
@@ -21,7 +21,6 @@ import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.SquareOverlay;
-import nu.pattern.OpenCV;
 
 /**
  * 
@@ -55,7 +54,7 @@ public class Test {
 			Imgproc.blur(imageMat, imageMat, new Size(1, 1));
 			Imgproc.cvtColor(imageMat, imageMat, Imgproc.COLOR_RGBA2GRAY);
 			Imgproc.Canny(imageMat, imageMat, 50, 150, 3, false);
-			BufferedImage edgeImage = toBufferedImage(imageMat);
+			BufferedImage edgeImage = ImageDataUtils.toBufferedImage(imageMat);
 			endEdge = System.nanoTime();
 			System.out.println("Edge detection: " + (endEdge - startEdge) / 1.0e6 + " ms");
 
@@ -98,31 +97,4 @@ public class Test {
 
 	}
 
-	/**
-	 * Method to allow an OpenCV image matrix to be converted to a
-	 * {@link BufferedImage}.
-	 * <p>
-	 * Adapted from answer by stack overflow user
-	 * <a href="http://stackoverflow.com/users/1297062/dannyxyz22">http://
-	 * stackoverflow.com/users/1297062/dannyxyz22</a>
-	 * </p>
-	 * question URL at: <a href=
-	 * "http://stackoverflow.com/questions/15670933/opencv-java-load-image-to-gui">
-	 * http://stackoverflow.com/questions/15670933/opencv-java-load-image-to-gui
-	 * </a>
-	 * 
-	 * @param m
-	 *            Matrix to convert
-	 * @return Matrix data in a buffered image
-	 */
-	public static BufferedImage toBufferedImage(Mat m) {
-		int type = BufferedImage.TYPE_BYTE_GRAY;
-		if (m.channels() > 1) {
-			type = BufferedImage.TYPE_3BYTE_BGR;
-		}
-		BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
-		byte[] b = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		m.get(0, 0, b);
-		return image;
-	}
 }
