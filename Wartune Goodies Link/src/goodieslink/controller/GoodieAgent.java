@@ -1,8 +1,10 @@
 package goodieslink.controller;
 
 import java.awt.AWTException;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.List;
@@ -17,6 +19,7 @@ import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
+import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 
 /**
@@ -28,6 +31,10 @@ import goodieslink.processing.pathfinding.Pathfinder;
  *
  */
 public class GoodieAgent {
+
+	private final int ROBOT_INTER_CLICK_DELAY = 100;
+	private final int ROBOT_MOUSE_DOWN_UP_DELAY = 100;
+	private final int ROBOT_MOUSE_MOVE_DELAY = 1;
 
 	private BufferedImage image;
 	private Robot goodieRobot;
@@ -123,5 +130,34 @@ public class GoodieAgent {
 
 	public void setScreenRegion(Rectangle region) {
 		this.screenRegion = region;
+	}
+
+	public boolean isDone() {
+		return board.isEmpty();
+	}
+
+	public void clickOnMatch() {
+		GoodiePath foundPath = matchDetector.findPath();
+		if (foundPath != null) {
+			// there was a path found
+			Point startPoint = foundPath.getStartPoint();
+			Point endPoint = foundPath.getEndPoint();
+
+			Point startScreen = board.gridToPixel(startPoint);
+			Point endScreen = board.gridToPixel(endPoint);
+
+			moveAndClick(startScreen);
+			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
+			moveAndClick(endScreen);
+		}
+
+	}
+
+	private void moveAndClick(Point imageLocation) {
+		goodieRobot.mouseMove(screenRegion.x + imageLocation.x, screenRegion.y + imageLocation.y);
+		goodieRobot.delay(ROBOT_MOUSE_MOVE_DELAY);
+		goodieRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		goodieRobot.delay(ROBOT_MOUSE_DOWN_UP_DELAY);
+		goodieRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
 }
