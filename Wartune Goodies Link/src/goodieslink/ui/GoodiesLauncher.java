@@ -32,7 +32,7 @@ public class GoodiesLauncher extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		ScreenRegionSelect regionSelectCreator = new ScreenRegionSelect();
 		Stage regionSelector = regionSelectCreator.create();
-		Stage statusWindow = new GoodieStatusWindow(regionSelector).create();
+		Stage statusWindow = new GoodieStatusWindow(regionSelectCreator).create();
 
 		regionSelector.show();
 		statusWindow.show();

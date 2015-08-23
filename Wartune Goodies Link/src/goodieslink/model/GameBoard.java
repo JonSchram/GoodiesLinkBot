@@ -651,4 +651,22 @@ public class GameBoard {
 		this.tolerance = tolerance;
 	}
 
+	/**
+	 * Counts how many squares are remaining on the grid
+	 * 
+	 * @return
+	 */
+	public int getCountRemaining() {
+		int count = 0;
+		if (initialized) {
+			for (int i = 0; i < gridHeight; i++) {
+				for (int j = 0; j < gridWidth; j++) {
+					if (iconIds[i][j] != 0) {
+						count++;
+					}
+				}
+			}
+		}
+		return count;
+	}
 }

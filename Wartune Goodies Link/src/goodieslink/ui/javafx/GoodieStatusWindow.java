@@ -4,6 +4,7 @@ import java.awt.AWTException;
 
 import goodieslink.controller.GoodieAgent;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -15,9 +16,10 @@ import javafx.stage.WindowEvent;
 
 public class GoodieStatusWindow {
 	GoodieAgent agent;
-	Stage regionSelector;
+	ScreenRegionSelect regionSelector;
+	Label countRemainingLabel;
 
-	public GoodieStatusWindow(Stage regionSelector) {
+	public GoodieStatusWindow(ScreenRegionSelect regionSelector) {
 		this.regionSelector = regionSelector;
 	}
 
@@ -53,12 +55,61 @@ public class GoodieStatusWindow {
 		gp.add(instructionLabel3, 1, 3, 2, 1);
 
 		Button startButton = new Button("Start");
+		startButton.setOnAction(new StartButtonHandler());
 		gp.add(startButton, 1, 4, 1, 1);
+
+		countRemainingLabel = new Label();
+		gp.add(countRemainingLabel, 2, 4, 1, 1);
 
 		s.setScene(scene);
 
 		agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
 
 		return s;
+	}
+
+	private void setCountRemainingText(int count) {
+		countRemainingLabel.setText("Squares remaining: " + count);
+	}
+
+	class StartButtonHandler implements EventHandler<ActionEvent> {
+		private boolean started;
+
+		public StartButtonHandler() {
+			started = false;
+		}
+
+		@Override
+		public void handle(ActionEvent event) {
+			if (!started) {
+				started = true;
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						agent.setScreenRegion(regionSelector.getEnclosedRegion());
+						agent.detectIcons();
+						while (!agent.isDone()) {
+							boolean success = agent.clickOnMatch();
+							if (!success) {
+								// was no match
+								agent.captureScreen();
+								agent.processScreen();
+							} else {
+								final int remaining = agent.countRemaining();
+								// submit count remaining to status label
+								Platform.runLater(new Runnable() {
+									@Override
+									public void run() {
+										setCountRemainingText(remaining);
+									}
+								});
+							}
+						}
+					}
+				}).start();
+			}
+		}
+
 	}
 }

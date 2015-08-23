@@ -136,7 +136,17 @@ public class GoodieAgent {
 		return board.isEmpty();
 	}
 
-	public void clickOnMatch() {
+	public int countRemaining() {
+		return board.getCountRemaining();
+	}
+
+	/**
+	 * Attempts to click on a pair of matching icons. Returns whether this
+	 * action succeeded
+	 * 
+	 * @return
+	 */
+	public boolean clickOnMatch() {
 		GoodiePath foundPath = matchDetector.findPath();
 		if (foundPath != null) {
 			// there was a path found
@@ -149,8 +159,9 @@ public class GoodieAgent {
 			moveAndClick(startScreen);
 			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
 			moveAndClick(endScreen);
+			return true;
 		}
-
+		return false;
 	}
 
 	private void moveAndClick(Point imageLocation) {
