@@ -122,10 +122,10 @@ public class RectangleBorder extends Rectangle {
 				}
 
 				if (resizeBottom) {
-					newHeight = event.getY();
+					newHeight = event.getY() - padding * 2;
 				} else if (resizeTop) {
 					if (beginBottomEdge - event.getScreenY() >= MIN_HEIGHT) {
-						double delta = RectangleBorder.this.getY() - event.getY();
+						double delta = s.getWindow().getY() - event.getScreenY();
 						newPosY = RectangleBorder.this.getY() - delta;
 						newHeight = beginBottomEdge - event.getScreenY();
 					}
