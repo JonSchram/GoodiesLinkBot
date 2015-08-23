@@ -1,19 +1,12 @@
-package goodieslink.ui;
+package goodieslink.ui.javafx;
 
 import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Insets;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.Window;
 
 public class ScreenRegionSelect extends Application {
 
@@ -30,6 +23,7 @@ public class ScreenRegionSelect extends Application {
 	@Override
 	public void start(final Stage primaryStage) {
 		primaryStage.initStyle(StageStyle.TRANSPARENT);
+		primaryStage.setAlwaysOnTop(true);
 
 		Pane shapes = new Pane();
 		stage = primaryStage;
@@ -46,6 +40,7 @@ public class ScreenRegionSelect extends Application {
 
 		shapes.getChildren().add(sizeRect);
 
+		primaryStage.setTitle("Rectangular select");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 		sizeRect.setRectangleSize(0, 0, 100, 100);

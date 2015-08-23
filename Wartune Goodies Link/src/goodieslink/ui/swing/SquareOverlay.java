@@ -1,4 +1,4 @@
-package goodieslink.ui;
+package goodieslink.ui.swing;
 
 import goodieslink.processing.Square;
 

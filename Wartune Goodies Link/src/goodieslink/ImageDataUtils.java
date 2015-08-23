@@ -5,7 +5,7 @@ import java.awt.image.DataBufferByte;
 
 import org.opencv.core.Mat;
 
-import goodieslink.ui.ImagePreview;
+import goodieslink.ui.swing.ImagePreview;
 
 /**
  * Utility class containing several common functions relating to working with

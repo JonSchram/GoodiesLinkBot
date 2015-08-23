@@ -20,7 +20,7 @@ import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
-import goodieslink.ui.SquareOverlay;
+import goodieslink.ui.swing.SquareOverlay;
 
 /**
  * 

@@ -9,6 +9,8 @@ import javax.swing.SwingUtilities;
 
 import org.opencv.core.Core;
 
+import goodieslink.ui.swing.GoodieWindow;
+
 /**
  * Performs initialization and begins UI
  * 

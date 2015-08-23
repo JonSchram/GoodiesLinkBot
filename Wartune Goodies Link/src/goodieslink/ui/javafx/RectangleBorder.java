@@ -1,4 +1,4 @@
-package goodieslink.ui;
+package goodieslink.ui.javafx;
 
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -218,7 +218,8 @@ public class RectangleBorder extends Rectangle {
 		}
 
 		private void handleRelease(MouseEvent event) {
-
+			setStrokeWidth(thinBorderSize);
+			getScene().setCursor(Cursor.DEFAULT);
 		}
 
 		private Edge mouseLocation(MouseEvent event) {

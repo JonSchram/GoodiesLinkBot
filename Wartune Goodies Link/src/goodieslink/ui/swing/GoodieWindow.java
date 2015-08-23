@@ -1,4 +1,4 @@
-package goodieslink.ui;
+package goodieslink.ui.swing;
 
 import java.awt.Color;
 import java.awt.GridLayout;
