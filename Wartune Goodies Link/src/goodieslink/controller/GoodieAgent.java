@@ -21,6 +21,7 @@ import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
+import goodieslink.ui.swing.ImagePreview;
 
 /**
  * 
@@ -93,7 +94,13 @@ public class GoodieAgent {
 	 */
 	public void captureScreen() {
 		BufferedImage boardImage = goodieRobot.createScreenCapture(screenRegion);
-		this.image = boardImage;
+		// effectively convert screen capture to another image type such that
+		// the resulting image is a specific format
+		// TYPE_3BYTE_BGR is stored as bytes
+		BufferedImage convertedImage = new BufferedImage(boardImage.getWidth(), boardImage.getHeight(),
+				BufferedImage.TYPE_3BYTE_BGR);
+		convertedImage.getGraphics().drawImage(boardImage, 0, 0, null);
+		this.image = convertedImage;
 	}
 
 	public void detectIcons() {
@@ -121,6 +128,7 @@ public class GoodieAgent {
 		List<Square> squares = squareDetector.getBoxes(squareDetectionThreshold,
 				new GridFilter(averageRadius, averageRadius));
 
+		board.setImageQuiet(image);
 		board.setGridLocations(squares);
 	}
 
@@ -159,6 +167,9 @@ public class GoodieAgent {
 			moveAndClick(startScreen);
 			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
 			moveAndClick(endScreen);
+
+			board.removeSpace(startPoint);
+			board.removeSpace(endPoint);
 			return true;
 		}
 		return false;

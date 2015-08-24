@@ -91,6 +91,47 @@ public class GoodiePath implements Iterable<Point> {
 
 		@Override
 		public boolean hasNext() {
+			switch (segment) {
+			case 0:
+				if (corner1 == null) {
+					if (corner2 == null) {
+						// straight line with no corners
+						if (startPoint.x != endPoint.x && startPoint.y != endPoint.y) {
+							return false;
+						}
+					} else {
+						// 1 corner at corner2
+						if (startPoint.x != corner2.x && startPoint.y != corner2.y) {
+							return false;
+						}
+					}
+				} else {
+					// 1 corner at corner 1
+					if (startPoint.x != corner1.x && startPoint.y != corner1.y) {
+						return false;
+					}
+				}
+				break;
+			case 1:
+				if (corner2 == null) {
+					// move from corner1 to end
+					if (corner1.x != endPoint.x && corner1.y != endPoint.y) {
+						return false;
+					}
+				} else {
+					// move from corner1 to corner2
+					if (corner1.x != corner2.x && corner1.y != corner2.y) {
+						return false;
+					}
+				}
+				break;
+			case 2:
+				// move from corner2 to end
+				if (corner2.x != endPoint.x && corner2.y != endPoint.y) {
+					return false;
+				}
+				break;
+			}
 			return segment != 3;
 		}
 
@@ -238,7 +279,7 @@ public class GoodiePath implements Iterable<Point> {
 	 *            Point which will be a corner
 	 */
 	public void setCorner1(Point corner) {
-		if (!startPoint.equals(corner) && (corner2 != null && !corner2.equals(corner))) {
+		if (!startPoint.equals(corner) && !(corner2 != null && corner2.equals(corner))) {
 			corner1 = corner;
 		} else {
 			corner1 = null;
@@ -253,7 +294,7 @@ public class GoodiePath implements Iterable<Point> {
 	 *            Path which will be the second corner.
 	 */
 	public void setCorner2(Point corner) {
-		if (!endPoint.equals(corner) && (corner1 != null && !corner1.equals(corner))) {
+		if (!endPoint.equals(corner) && !(corner1 != null && corner1.equals(corner))) {
 			corner2 = corner;
 		} else {
 			corner2 = null;

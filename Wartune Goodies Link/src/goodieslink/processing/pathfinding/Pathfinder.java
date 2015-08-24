@@ -55,7 +55,7 @@ public class Pathfinder {
 			int col = 0;
 			while (col < boardSize.width && !pairFound) {
 				int squareId = board.getSquareId(row, col);
-				if (!failedIds.contains(squareId)) {
+				if (squareId != 0 && !failedIds.contains(squareId)) {
 					Point[] matches = getAllMatches(squareId);
 					int compare1 = 0;
 					while (compare1 < matches.length - 1 && !pairFound) {
@@ -114,11 +114,13 @@ public class Pathfinder {
 	 *         if no valid path exists for this pair of points
 	 */
 	private GoodiePath getPath(Point startPoint, Point endPoint) {
-
+		boolean pathValid = false;
 		GoodiePath testPath = new GoodiePath(startPoint, endPoint);
-		boolean pathValid = isPathValid(testPath);
-		if (pathValid) {
-			return testPath;
+		if (startPoint.x == endPoint.x || startPoint.y == endPoint.y) {
+			pathValid = isPathValid(testPath);
+			if (pathValid) {
+				return testPath;
+			}
 		}
 
 		Dimension size = board.getSize();

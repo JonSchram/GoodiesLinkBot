@@ -1,11 +1,9 @@
 package goodieslink.ui.javafx;
 
 import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 
-import javax.swing.SizeRequirements;
+import org.opencv.core.Rect;
 
-import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -24,7 +22,7 @@ public class ScreenRegionSelect {
 		Pane shapes = new Pane();
 		stage = s;
 		scene = new Scene(shapes, s.getWidth(), s.getHeight(), null);
-		scene.setFill(null);
+		scene.setFill(Color.TRANSPARENT);
 
 		sizeRect = new RectangleBorder(0, 0, 100, 100);
 		sizeRect.setStrokeType(StrokeType.OUTSIDE);
@@ -43,15 +41,23 @@ public class ScreenRegionSelect {
 		return s;
 	}
 
-	Stage stage;
+	private Stage stage;
 
-	Scene scene;
+	private Scene scene;
 
-	RectangleBorder sizeRect;
+	private RectangleBorder sizeRect;
 
 	public Rectangle getEnclosedRegion() {
 		return new Rectangle((int) (sizeRect.getX() + stage.getX()), (int) (sizeRect.getY() + stage.getY()),
 				(int) sizeRect.getWidth(), (int) sizeRect.getHeight());
+	}
+
+	public Stage getStage() {
+		return stage;
+	}
+
+	public void adjustRectSize(Rectangle r) {
+		sizeRect.setRectangleSize(r.x, r.y, r.width, r.height);
 	}
 
 	public void initRectSize() {

@@ -154,6 +154,7 @@ public class GameBoard {
 	 */
 	private void computeSquareIds() {
 		if (hasSquares && hasImage) {
+			iconIds = new int[gridHeight][gridWidth];
 			int nextID = 1;
 			// HashSet<Integer> nonMatchingIcons = new HashSet<>();
 			Set<Integer> nonMatchingIcons = Collections.synchronizedSet(new HashSet<Integer>());
@@ -172,9 +173,8 @@ public class GameBoard {
 						for (int i = 0; i < row && iconIds[row][col] == 0; i++) {
 							for (int j = 0; j < iconIds[i].length && iconIds[row][col] == 0; j++) {
 								// don't bother checking similarity if that icon
-								// has
-								// been checked
-								if (!nonMatchingIcons.contains(iconIds[i][j])) {
+								// has been checked
+								if (squareLocations[i][j] != null && !nonMatchingIcons.contains(iconIds[i][j])) {
 									Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(i, j),
 											new Point(row, col), iconIds[i][j], squareLocations[row][col],
 											squareLocations[i][j], matcher, nonMatchingIcons));
@@ -192,7 +192,7 @@ public class GameBoard {
 						}
 						// compare square to all those to the left in same row
 						for (int j = 0; j < col && iconIds[row][col] == 0; j++) {
-							if (!nonMatchingIcons.contains(iconIds[row][j])) {
+							if (squareLocations[row][j] != null && !nonMatchingIcons.contains(iconIds[row][j])) {
 								Future<SimilarityResult> future = pool.submit(new GameBoardWorker(new Point(row, j),
 										new Point(row, col), iconIds[row][j], squareLocations[row][col],
 										squareLocations[row][j], matcher, nonMatchingIcons));
@@ -604,10 +604,13 @@ public class GameBoard {
 	 */
 	public void setGridLocations(List<Square> gridLocations) {
 		this.gridLocations = gridLocations;
-		hasSquares = true;
-		convertToSquareArray();
-		computeSquareIds();
-		initialized = true;
+		if (gridLocations.size() > 0) {
+			// guard against no squares detected
+			hasSquares = true;
+			convertToSquareArray();
+			computeSquareIds();
+			initialized = true;
+		}
 	}
 
 	/**
@@ -621,6 +624,17 @@ public class GameBoard {
 		matcher.setImage(newImage);
 		hasImage = true;
 		computeSquareIds();
+	}
+
+	/**
+	 * Sets image of matcher without trigging a computation of square IDs,
+	 * required when setting up the game board for the first time
+	 * 
+	 * @param newImage
+	 */
+	public void setImageQuiet(BufferedImage newImage) {
+		matcher.setImage(newImage);
+		hasImage = true;
 	}
 
 	public void setSimilarityThreshold(double similarityThreshold) {
