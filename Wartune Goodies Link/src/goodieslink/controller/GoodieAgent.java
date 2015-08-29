@@ -21,7 +21,7 @@ import goodieslink.processing.hough.GridFilter;
 import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
-import goodieslink.ui.swing.ImagePreview;
+import goodieslink.ui.javafx.console.DebugConsole.DebugStream;
 
 /**
  * 
@@ -44,6 +44,8 @@ public class GoodieAgent {
 	private GameBoard board;
 	private Pathfinder matchDetector;
 	private SquareTransform squareDetector;
+
+	private DebugStream debugStream;
 
 	private double squareDetectionThreshold;
 	private int minSquareRadius;
@@ -81,6 +83,17 @@ public class GoodieAgent {
 		screenRegion = new Rectangle();
 		goodieRobot = new Robot();
 		matchDetector = new Pathfinder(board);
+		debugStream = null;
+	}
+
+	private void trySendText(String text) {
+		if (debugStream != null) {
+			debugStream.sendText(text);
+		}
+	}
+
+	public void setDebugStream(DebugStream stream) {
+		debugStream = stream;
 	}
 
 	/**
@@ -105,7 +118,9 @@ public class GoodieAgent {
 
 	public void detectIcons() {
 		captureScreen();
+		trySendText("Goodie agent took screenshot");
 		processScreen();
+		trySendText("Goodie agent processed screenshot");
 	}
 
 	public void detectSquares() {
@@ -164,12 +179,15 @@ public class GoodieAgent {
 			Point startScreen = board.gridToPixel(startPoint);
 			Point endScreen = board.gridToPixel(endPoint);
 
+			trySendText("Clicking path: " + foundPath);
 			moveAndClick(startScreen);
 			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
 			moveAndClick(endScreen);
 
 			board.removeSpace(startPoint);
 			board.removeSpace(endPoint);
+			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
+
 			return true;
 		}
 		return false;

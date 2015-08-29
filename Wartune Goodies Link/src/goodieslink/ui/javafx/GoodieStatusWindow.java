@@ -4,20 +4,23 @@ import java.awt.AWTException;
 import java.awt.Rectangle;
 
 import goodieslink.controller.GoodieAgent;
+import goodieslink.ui.javafx.console.DebugConsole;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class GoodieStatusWindow {
+public class GoodieStatusWindow extends Stage {
 	class StartButtonHandler implements EventHandler<ActionEvent> {
 		private boolean started;
 
@@ -30,159 +33,169 @@ public class GoodieStatusWindow {
 			if (!started) {
 				started = true;
 				captureRegion = regionSelector.getEnclosedRegion();
+				outputConsole.getDebugStream().sendText("Screen capturing region " + captureRegion);
 				// close the selector so that a screenshot can be taken
-				regionSelector.getStage().close();
+				regionSelector.close();
+				outputConsole.getDebugStream().sendText("Starting clicks");
+				performClicks();
 			}
+		}
+
+		private void performClicks() {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					stopOperation = false;
+					try {
+						// sleep because the screenshot is taken too
+						// quickly after the window is hidden
+						Thread.sleep(15);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					// agent must make these calls in this order to
+					// initialize
+					agent.setScreenRegion(captureRegion);
+					agent.captureScreen();
+					outputConsole.getDebugStream().sendText("Took screenshot");
+					agent.detectSquares();
+					outputConsole.getDebugStream().sendText("Detected squares");
+					while (!agent.isDone() && !stopOperation) {
+						boolean success = agent.clickOnMatch();
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								// try to see if the user wants to quit
+								requestFocus();
+							}
+						});
+						if (!success) {
+							// was no match, detect icons again
+							outputConsole.getDebugStream()
+									.sendText("Could not click on match, taking another screenshot");
+							agent.detectIcons();
+							outputConsole.getDebugStream().sendText("Attempting to find another match");
+
+						} else {
+							outputConsole.getDebugStream().sendText("Match found");
+							final int remaining = agent.countRemaining();
+							// submit count remaining to status
+							// label
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
+									setCountRemainingText(remaining);
+								}
+							});
+						}
+					}
+					started = false;
+					outputConsole.getDebugStream().sendText("Finished clicks");
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							regionSelector.show();
+							regionSelector.adjustRectSize(captureRegion);
+						}
+					});
+				}
+
+			}).start();
 		}
 
 	}
 
 	GoodieAgent agent;
 	ScreenRegionSelect regionSelector;
+	DebugConsole outputConsole;
 	Label countRemainingLabel;
-	Stage stage;
 
 	Rectangle captureRegion;
 
 	boolean stopOperation;
 
-	public GoodieStatusWindow() {
-		stage = null;
+	public GoodieStatusWindow() throws AWTException {
 		stopOperation = false;
-		this.regionSelector = new ScreenRegionSelect();
-		regionSelector.create();
-		setCloseHandler();
+		create();
+		regionSelector = new ScreenRegionSelect();
+		outputConsole = new DebugConsole();
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				regionSelector.getStage().show();
+				regionSelector.show();
 				regionSelector.initRectSize();
 			}
 		});
 	}
 
-	public Stage create() throws AWTException {
-		if (stage == null) {
-			Stage s = new Stage();
-			s.setAlwaysOnTop(true);
-			// make all windows (including the region selector) close when this
-			// window exits
-			s.setOnCloseRequest(new EventHandler<WindowEvent>() {
-				@Override
-				public void handle(WindowEvent event) {
-					Platform.exit();
-				}
-			});
-
-			GridPane gp = new GridPane();
-			gp.setVgap(3);
-			gp.setPadding(new Insets(5));
-			Scene scene = new Scene(gp);
-
-			Label instructionLabel = new Label("Resize the red rectangle around the game board");
-			instructionLabel.setWrapText(true);
-			gp.add(instructionLabel, 1, 1, 2, 1);
-
-			Label instructionLabel2 = new Label(
-					"Then click this start button and the mouse will automatically click matching squares.");
-			instructionLabel2.setWrapText(true);
-			gp.add(instructionLabel2, 1, 2, 2, 1);
-
-			Label instructionLabel3 = new Label(
-					"Please don't have your web browser on full screen mode because depending on your platform the rectangle will not stay on top of the browser.");
-			instructionLabel3.setWrapText(true);
-			gp.add(instructionLabel3, 1, 3, 2, 1);
-
-			Label instructionLabel4 = new Label("Press ESC to stop clicking.");
-			gp.add(instructionLabel4, 1, 4, 2, 1);
-
-			Button startButton = new Button("Start");
-			startButton.setOnAction(new StartButtonHandler());
-			gp.add(startButton, 1, 5, 1, 1);
-
-			countRemainingLabel = new Label();
-			gp.add(countRemainingLabel, 2, 5, 1, 1);
-
-			s.setScene(scene);
-
-			agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
-			stage = s;
-			scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-				@Override
-				public void handle(KeyEvent event) {
-					if (event.getCode() == KeyCode.ESCAPE) {
-						stopOperation = true;
-					}
-				}
-			});
-		}
-		return stage;
-	}
-
-	private void setCloseHandler() {
-		regionSelector.getStage().setOnHidden(new EventHandler<WindowEvent>() {
+	private void create() throws AWTException {
+		this.setAlwaysOnTop(true);
+		// make all windows (including the region selector) close when this
+		// window exits
+		this.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {
-				if (stage.isShowing()) {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							stopOperation = false;
-							try {
-								// sleep because the screenshot is taken too
-								// quickly
-								// after the window is hidden
-								Thread.sleep(15);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-							// agent must make these calls in this order to
-							// initialize
-							agent.setScreenRegion(captureRegion);
-							agent.captureScreen();
-							agent.detectSquares();
-							while (!agent.isDone() && !stopOperation) {
-								boolean success = agent.clickOnMatch();
-								Platform.runLater(new Runnable() {
-									@Override
-									public void run() {
-										// try to see if the user wants to quit
-										stage.requestFocus();
-									}
-								});
-								if (!success) {
-									// was no match, detect icons again
-									agent.detectIcons();
-								} else {
+				Platform.exit();
+			}
+		});
 
-									final int remaining = agent.countRemaining();
-									// submit count remaining to status
-									// label
-									Platform.runLater(new Runnable() {
-										@Override
-										public void run() {
-											setCountRemainingText(remaining);
-										}
-									});
-								}
-							}
-							regionSelector = new ScreenRegionSelect();
+		setTitle("The Goodie Linker");
 
-							Platform.runLater(new Runnable() {
-								@Override
-								public void run() {
-									regionSelector.create();
-									setCloseHandler();
-									regionSelector.getStage().show();
-									regionSelector.adjustRectSize(captureRegion);
-								}
-							});
-						}
+		GridPane gp = new GridPane();
+		gp.setVgap(3);
+		gp.setPadding(new Insets(5));
+		Scene scene = new Scene(gp);
 
-					}).start();
+		Label instructionLabel = new Label("Resize the red rectangle around the game board");
+		instructionLabel.setWrapText(true);
+		gp.add(instructionLabel, 1, 1, 2, 1);
+
+		Label instructionLabel2 = new Label(
+				"Then click this start button and the mouse will automatically click matching squares.");
+		instructionLabel2.setWrapText(true);
+		gp.add(instructionLabel2, 1, 2, 2, 1);
+
+		Label instructionLabel3 = new Label(
+				"Please don't have your web browser on full screen mode because depending on your platform the rectangle will not stay on top of the browser.");
+		instructionLabel3.setWrapText(true);
+		gp.add(instructionLabel3, 1, 3, 2, 1);
+
+		Label instructionLabel4 = new Label("Press ESC to stop clicking.");
+		gp.add(instructionLabel4, 1, 4, 2, 1);
+
+		Button startButton = new Button("Start");
+		startButton.setOnAction(new StartButtonHandler());
+		gp.add(startButton, 1, 5, 1, 1);
+
+		countRemainingLabel = new Label();
+		gp.add(countRemainingLabel, 2, 5, 1, 1);
+
+		CheckBox debugCheckBox = new CheckBox("Debug mode");
+		debugCheckBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				outputConsole.setDebugMode(debugCheckBox.isSelected());
+				if (debugCheckBox.isSelected()) {
+					outputConsole.show();
+				} else {
+					outputConsole.hide();
 				}
 			}
 		});
+		gp.add(debugCheckBox, 1, 6, 2, 1);
+
+		this.setScene(scene);
+
+		agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
+		scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.ESCAPE) {
+					stopOperation = true;
+				}
+			}
+		});
+
 	}
 
 	private void setCountRemainingText(int count) {

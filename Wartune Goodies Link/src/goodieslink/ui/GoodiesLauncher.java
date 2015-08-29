@@ -3,7 +3,6 @@ package goodieslink.ui;
 import org.opencv.core.Core;
 
 import goodieslink.ui.javafx.GoodieStatusWindow;
-import goodieslink.ui.javafx.ScreenRegionSelect;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -30,8 +29,7 @@ public class GoodiesLauncher extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Stage statusWindow = new GoodieStatusWindow().create();
-
+		Stage statusWindow = new GoodieStatusWindow();
 		statusWindow.show();
 	}
 
