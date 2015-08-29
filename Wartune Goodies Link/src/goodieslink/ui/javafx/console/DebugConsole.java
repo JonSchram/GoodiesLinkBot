@@ -19,6 +19,7 @@ public class DebugConsole extends Stage {
 		// hide away messier stage creation code
 		consoleText = new ConsoleTextArea();
 		this.setTitle("Debugging Console");
+		setAlwaysOnTop(true);
 		BorderPane bp = new BorderPane();
 		bp.setCenter(consoleText);
 		Scene s = new Scene(bp);
