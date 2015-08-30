@@ -41,7 +41,7 @@ public class Pathfinder {
 	 * @return A valid path, null if no paths exist
 	 */
 	public GoodiePath findPath() {
-		GoodiePath path = new GoodiePath();
+		GoodiePath path = null;
 		Dimension boardSize = board.getSize();
 
 		// whether two matching spaces have been found;

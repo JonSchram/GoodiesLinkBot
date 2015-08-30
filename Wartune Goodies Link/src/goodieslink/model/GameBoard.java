@@ -239,6 +239,7 @@ public class GameBoard {
 
 				}
 			}
+			pool.shutdownNow();
 		} else {
 			throw new NullPointerException("Can't compute square IDs, no image or no squares");
 		}

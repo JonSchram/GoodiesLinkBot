@@ -141,6 +141,11 @@ public class GoodieAgent {
 		return false;
 	}
 
+	public boolean hasMatch() {
+		GoodiePath foundPath = matchDetector.findPath();
+		return foundPath != null;
+	}
+
 	public int countRemaining() {
 		return board.getCountRemaining();
 	}

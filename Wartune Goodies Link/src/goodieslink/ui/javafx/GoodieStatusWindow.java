@@ -66,6 +66,11 @@ public class GoodieStatusWindow extends Stage {
 					agent.detectSquares();
 					outputConsole.getDebugStream().sendText("Detected squares");
 					while (!agent.isDone() && !stopOperation) {
+						if (agent.hasMatch()) {
+							// match was found so put a delay here before
+							// clicking again
+							agent.delayBetweenClicks();
+						}
 						boolean success = agent.clickOnMatch();
 						Platform.runLater(new Runnable() {
 							@Override
@@ -96,15 +101,17 @@ public class GoodieStatusWindow extends Stage {
 					}
 					started = false;
 					outputConsole.getDebugStream().sendText("Finished clicks");
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							regionSelector.show();
-							// make window appear where it was before
-							regionSelector.restoreState();
-							// regionSelector.adjustRectSize(captureRegion);
-						}
-					});
+					if (GoodieStatusWindow.this.isShowing()) {
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								regionSelector.show();
+								// make window appear where it was before
+								regionSelector.restoreState();
+								// regionSelector.adjustRectSize(captureRegion);
+							}
+						});
+					}
 				}
 
 			}).start();
@@ -123,9 +130,9 @@ public class GoodieStatusWindow extends Stage {
 
 	public GoodieStatusWindow() throws AWTException {
 		stopOperation = false;
-		create();
 		regionSelector = new ScreenRegionSelect();
 		outputConsole = new DebugConsole();
+		create();
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -155,6 +162,7 @@ public class GoodieStatusWindow extends Stage {
 		Scene scene = new Scene(gp);
 
 		agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
+		agent.setDebugStream(outputConsole.getDebugStream());
 		scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
@@ -186,7 +194,7 @@ public class GoodieStatusWindow extends Stage {
 		gp.add(startButton, 1, 5, 1, 1);
 
 		countRemainingLabel = new Label();
-		gp.add(countRemainingLabel, 2, 5, 1, 1);
+		gp.add(countRemainingLabel, 1, 6, 2, 1);
 
 		CheckBox debugCheckBox = new CheckBox("Debug mode");
 		debugCheckBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -200,7 +208,7 @@ public class GoodieStatusWindow extends Stage {
 				}
 			}
 		});
-		gp.add(debugCheckBox, 1, 6, 2, 1);
+		gp.add(debugCheckBox, 1, 7, 2, 1);
 
 		Label upDownDelayLabel = new Label("Delay between pressing and releasing mouse button (millisec.):");
 		upDownDelayLabel.setWrapText(true);
@@ -213,8 +221,8 @@ public class GoodieStatusWindow extends Stage {
 				agent.setDelayUpDown(newValue);
 			}
 		});
-		gp.add(upDownDelayLabel, 1, 7, 1, 1);
-		gp.add(upDownDelaySpinner, 2, 7, 1, 1);
+		gp.add(upDownDelayLabel, 1, 8, 1, 1);
+		gp.add(upDownDelaySpinner, 2, 9, 1, 1);
 
 		Label betweenClickDelayLabel = new Label("Delay between clicks (millisec):");
 		betweenClickDelayLabel.setWrapText(true);
@@ -227,8 +235,8 @@ public class GoodieStatusWindow extends Stage {
 				agent.setDelayBetweenClicks(newValue);
 			}
 		});
-		gp.add(betweenClickDelayLabel, 1, 8, 1, 1);
-		gp.add(betweenClickDelaySpinner, 2, 8, 1, 1);
+		gp.add(betweenClickDelayLabel, 1, 10, 1, 1);
+		gp.add(betweenClickDelaySpinner, 2, 10, 1, 1);
 
 		this.setScene(scene);
 
