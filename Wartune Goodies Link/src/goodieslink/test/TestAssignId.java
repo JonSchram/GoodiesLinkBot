@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotEquals;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -39,7 +38,7 @@ public class TestAssignId {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		nu.pattern.OpenCV.loadShared();
+		// nu.pattern.OpenCV.loadShared();
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 

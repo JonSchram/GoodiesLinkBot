@@ -1,0 +1,16 @@
+# target folders
+target
+
+# sbt directories
+project/project
+project/target
+
+# sbt command history
+.history
+
+# IntelliJ IDEA
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws

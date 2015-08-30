@@ -16,6 +16,7 @@ public class GoodieWindow extends JFrame {
 		DEFAULT, LEGACY;
 	}
 
+	@SuppressWarnings("unused")
 	private GoodieDisplayMode currentMode;
 	private TransparentPanel transparentPanel;
 	private JPanel visiblePanel;

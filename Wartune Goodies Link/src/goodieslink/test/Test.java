@@ -32,7 +32,7 @@ import goodieslink.ui.swing.SquareOverlay;
  */
 public class Test {
 	public static void main(String[] args) {
-		nu.pattern.OpenCV.loadShared();
+		// nu.pattern.OpenCV.loadShared();
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		// String imageFilename =
 		// "Goodies link edge detection/Screenshot from 2015-04-18

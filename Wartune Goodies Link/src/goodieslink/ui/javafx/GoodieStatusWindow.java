@@ -135,6 +135,7 @@ public class GoodieStatusWindow extends Stage {
 		this.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {
+				stopOperation = true;
 				Platform.exit();
 			}
 		});
