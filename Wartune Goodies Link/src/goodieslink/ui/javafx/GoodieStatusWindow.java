@@ -149,6 +149,13 @@ public class GoodieStatusWindow extends Stage {
 		pathWidth = 10;
 		decorator = new ImageDecorator(new BasicStroke(pathWidth), new java.awt.Color(228, 215, 0),
 				new BasicStroke(squareBorderWidth), new java.awt.Color(255, 0, 0));
+
+		// lowered threshold so that if part of a square is missing it will
+		// still be found
+		agent = new GoodieAgent(0.80, 19, 23, 20, 4, 10);
+		agent.setDebugStream(outputConsole.getDebugStream());
+		agent.setLogger(imageLogger);
+		agent.setDecorator(decorator);
 		create();
 		Platform.runLater(new Runnable() {
 			@Override
@@ -178,10 +185,6 @@ public class GoodieStatusWindow extends Stage {
 		gp.setPadding(new Insets(5));
 		Scene scene = new Scene(gp);
 
-		// lowered threshold so that if part of a square is missing it will
-		// still be found
-		agent = new GoodieAgent(0.80, 19, 23, 20, 4, 10);
-		agent.setDebugStream(outputConsole.getDebugStream());
 		scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
@@ -231,17 +234,28 @@ public class GoodieStatusWindow extends Stage {
 		GridPane imageDebugPanel = new GridPane();
 		imageDebugPanel.setDisable(true);
 
+		Label parentDirLabel = new Label();
+
 		CheckBox saveImagesCheckBox = new CheckBox("Save path images");
 		saveImagesCheckBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 				if (saveImagesCheckBox.isSelected()) {
 					DirectoryChooser folderChooser = new DirectoryChooser();
-					File chosenFolder = folderChooser.showDialog(null);
+					folderChooser.setTitle("Select location where debug folder should be created");
+					File chosenFolder = folderChooser.showDialog(GoodieStatusWindow.this);
 					if (chosenFolder != null) {
 						imageLogger.setLogging(true);
 						imageLogger.setDirectory(chosenFolder);
 						imageDebugPanel.setDisable(false);
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								parentDirLabel.setText("Saving in \"" + imageLogger.getParentDirectoryName()
+										+ File.separator + imageLogger.getDirectoryName() + "\"");
+							}
+						});
+
 					} else {
 						imageLogger.setLogging(false);
 						saveImagesCheckBox.setSelected(false);
@@ -277,15 +291,16 @@ public class GoodieStatusWindow extends Stage {
 			}
 		});
 
-		Label pathBorderLabel = new Label("Path border color:");
+		Label pathBorderLabel = new Label("Path line color:");
 		pathBorderLabel.setWrapText(true);
 		Label squareBorderLabel = new Label("Square border color:");
 		squareBorderLabel.setWrapText(true);
 
-		imageDebugPanel.add(pathBorderLabel, 0, 0);
-		imageDebugPanel.add(squareColorPicker, 1, 0);
+		imageDebugPanel.add(parentDirLabel, 0, 0, 2, 1);
 		imageDebugPanel.add(squareBorderLabel, 0, 1);
-		imageDebugPanel.add(pathColorPicker, 1, 1);
+		imageDebugPanel.add(squareColorPicker, 1, 1);
+		imageDebugPanel.add(pathBorderLabel, 0, 2);
+		imageDebugPanel.add(pathColorPicker, 1, 2);
 
 		gp.add(debugCheckBox, 0, 6, 2, 1);
 		gp.add(saveImagesCheckBox, 0, 7, 2, 1);

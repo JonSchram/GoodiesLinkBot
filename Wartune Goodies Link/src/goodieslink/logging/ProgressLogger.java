@@ -3,11 +3,13 @@ package goodieslink.logging;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import javax.imageio.ImageIO;
 
 public class ProgressLogger {
 	private File saveDirectory;
+	private File parentDirectory;
 	private int count;
 	private boolean logging;
 
@@ -34,10 +36,31 @@ public class ProgressLogger {
 	 */
 	public boolean setDirectory(File newDirectory) {
 		if (newDirectory.isDirectory()) {
-			saveDirectory = newDirectory;
-			return true;
+			LocalDateTime ldt = LocalDateTime.now();
+			String subdirName = ldt.toString();
+			subdirName = subdirName.replaceAll("[:.]", "-");
+			System.out.println("Saving in: " + subdirName);
+			parentDirectory = newDirectory;
+			saveDirectory = new File(newDirectory, subdirName);
+			return saveDirectory.mkdir();
 		}
 		return false;
+	}
+
+	public String getParentDirectoryName() {
+		if (parentDirectory != null) {
+			return parentDirectory.getName();
+		} else {
+			return "";
+		}
+	}
+
+	public String getDirectoryName() {
+		if (saveDirectory != null) {
+			return saveDirectory.getName();
+		} else {
+			return "";
+		}
 	}
 
 	public void logImage(BufferedImage image) throws IOException {

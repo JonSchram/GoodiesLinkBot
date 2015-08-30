@@ -105,6 +105,7 @@ public class ImageDecorator {
 
 	private void drawSquares(Graphics2D g2, Square[][] squares) {
 		g2.setStroke(squareStroke);
+		g2.setColor(squareBorderColor);
 		for (int i = 0; i < squares.length; i++) {
 			for (int j = 0; j < squares[i].length; j++) {
 				if (squares[i][j] != null) {
@@ -117,6 +118,7 @@ public class ImageDecorator {
 
 	private void drawSquares(Graphics2D g2, List<Square> squares) {
 		g2.setStroke(squareStroke);
+		g2.setColor(squareBorderColor);
 		for (Square s : squares) {
 			g2.drawRect(s.getX(), s.getY(), s.getSideLength(), s.getSideLength());
 		}
@@ -124,6 +126,7 @@ public class ImageDecorator {
 
 	private void drawPath(Graphics2D g2, GoodiePath path) {
 		g2.setStroke(pathStroke);
+		g2.setColor(pathColor);
 
 		LinkedList<Point> pathPoints = new LinkedList<>();
 		pathPoints.add(path.getStartPoint());
