@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 import goodieslink.controller.GoodieAgent;
 import goodieslink.ui.javafx.console.DebugConsole;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -13,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -22,7 +25,8 @@ import javafx.stage.WindowEvent;
 
 public class GoodieStatusWindow extends Stage {
 	class StartButtonHandler implements EventHandler<ActionEvent> {
-		private boolean started;
+		// make volatile so hopefully the clicker thread will stop properly
+		private volatile boolean started;
 
 		public StartButtonHandler() {
 			started = false;
@@ -35,6 +39,7 @@ public class GoodieStatusWindow extends Stage {
 				captureRegion = regionSelector.getEnclosedRegion();
 				outputConsole.getDebugStream().sendText("Screen capturing region " + captureRegion);
 				// close the selector so that a screenshot can be taken
+				regionSelector.saveState();
 				regionSelector.close();
 				outputConsole.getDebugStream().sendText("Starting clicks");
 				performClicks();
@@ -95,7 +100,9 @@ public class GoodieStatusWindow extends Stage {
 						@Override
 						public void run() {
 							regionSelector.show();
-							regionSelector.adjustRectSize(captureRegion);
+							// make window appear where it was before
+							regionSelector.restoreState();
+							// regionSelector.adjustRectSize(captureRegion);
 						}
 					});
 				}
@@ -147,6 +154,16 @@ public class GoodieStatusWindow extends Stage {
 		gp.setPadding(new Insets(5));
 		Scene scene = new Scene(gp);
 
+		agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
+		scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.ESCAPE) {
+					stopOperation = true;
+				}
+			}
+		});
+
 		Label instructionLabel = new Label("Resize the red rectangle around the game board");
 		instructionLabel.setWrapText(true);
 		gp.add(instructionLabel, 1, 1, 2, 1);
@@ -157,7 +174,7 @@ public class GoodieStatusWindow extends Stage {
 		gp.add(instructionLabel2, 1, 2, 2, 1);
 
 		Label instructionLabel3 = new Label(
-				"Please don't have your web browser on full screen mode because depending on your platform the rectangle will not stay on top of the browser.");
+				"Please don't have your web browser on full screen mode because depending on your platform this window will not stay on top of the browser.");
 		instructionLabel3.setWrapText(true);
 		gp.add(instructionLabel3, 1, 3, 2, 1);
 
@@ -185,17 +202,35 @@ public class GoodieStatusWindow extends Stage {
 		});
 		gp.add(debugCheckBox, 1, 6, 2, 1);
 
-		this.setScene(scene);
-
-		agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
-		scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+		Label upDownDelayLabel = new Label("Delay between pressing and releasing mouse button (millisec.):");
+		upDownDelayLabel.setWrapText(true);
+		Spinner<Integer> upDownDelaySpinner = new Spinner<>(10, 2000, agent.getDelayUpDown());
+		upDownDelaySpinner.setMinWidth(100);
+		upDownDelaySpinner.setEditable(true);
+		upDownDelaySpinner.valueProperty().addListener(new ChangeListener<Integer>() {
 			@Override
-			public void handle(KeyEvent event) {
-				if (event.getCode() == KeyCode.ESCAPE) {
-					stopOperation = true;
-				}
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				agent.setDelayUpDown(newValue);
 			}
 		});
+		gp.add(upDownDelayLabel, 1, 7, 1, 1);
+		gp.add(upDownDelaySpinner, 2, 7, 1, 1);
+
+		Label betweenClickDelayLabel = new Label("Delay between clicks (millisec):");
+		betweenClickDelayLabel.setWrapText(true);
+		Spinner<Integer> betweenClickDelaySpinner = new Spinner<>(10, 2000, agent.getDelayBetweenClicks());
+		betweenClickDelaySpinner.setMinWidth(100);
+		betweenClickDelaySpinner.setEditable(true);
+		betweenClickDelaySpinner.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				agent.setDelayBetweenClicks(newValue);
+			}
+		});
+		gp.add(betweenClickDelayLabel, 1, 8, 1, 1);
+		gp.add(betweenClickDelaySpinner, 2, 8, 1, 1);
+
+		this.setScene(scene);
 
 	}
 

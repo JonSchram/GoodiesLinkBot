@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ScreenRegionSelect extends Stage {
+	private Rectangle savedWindowSize;
 
 	public ScreenRegionSelect() {
 		create();
@@ -56,5 +57,19 @@ public class ScreenRegionSelect extends Stage {
 
 	public void initRectSize() {
 		sizeRect.setRectangleSize(0, 0, 100, 100);
+	}
+
+	public void saveState() {
+		savedWindowSize = new Rectangle((int) this.getX(), (int) this.getY(), (int) this.getWidth(),
+				(int) this.getHeight());
+	}
+
+	public void restoreState() {
+		if (savedWindowSize != null) {
+			setX(savedWindowSize.x);
+			setY(savedWindowSize.y);
+			setWidth(savedWindowSize.width);
+			setHeight(savedWindowSize.height);
+		}
 	}
 }

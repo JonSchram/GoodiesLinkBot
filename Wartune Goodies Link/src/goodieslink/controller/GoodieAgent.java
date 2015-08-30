@@ -22,7 +22,6 @@ import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.javafx.console.DebugConsole.DebugStream;
-import goodieslink.ui.swing.ImagePreview;
 
 /**
  * 
@@ -34,22 +33,26 @@ import goodieslink.ui.swing.ImagePreview;
  */
 public class GoodieAgent {
 
-	private final int ROBOT_INTER_CLICK_DELAY = 100;
-	private final int ROBOT_MOUSE_DOWN_UP_DELAY = 100;
-	private final int ROBOT_MOUSE_MOVE_DELAY = 1;
+	private int delayBetweenClicks = 100;
+	private int delayUpDown = 100;
+	private int delayMouseMove = 50;
 
 	private BufferedImage image;
+
 	private Robot goodieRobot;
+
 	private Rectangle screenRegion;
 
 	private GameBoard board;
+
 	private Pathfinder matchDetector;
+
 	private SquareTransform squareDetector;
 
 	private DebugStream debugStream;
-
 	private double squareDetectionThreshold;
 	private int minSquareRadius;
+
 	private int maxSquareRadius;
 
 	/**
@@ -87,16 +90,6 @@ public class GoodieAgent {
 		debugStream = null;
 	}
 
-	private void trySendText(String text) {
-		if (debugStream != null) {
-			debugStream.sendText(text);
-		}
-	}
-
-	public void setDebugStream(DebugStream stream) {
-		debugStream = stream;
-	}
-
 	/**
 	 * Get screenshot and store in the GoodieAgent but don't pass to the game
 	 * board. <br>
@@ -117,6 +110,43 @@ public class GoodieAgent {
 		// ImagePreview ip = new ImagePreview(convertedImage);
 		// ip.show();
 		this.image = convertedImage;
+	}
+
+	/**
+	 * Attempts to click on a pair of matching icons. Returns whether this
+	 * action succeeded
+	 * 
+	 * @return
+	 */
+	public boolean clickOnMatch() {
+		GoodiePath foundPath = matchDetector.findPath();
+		if (foundPath != null) {
+			// there was a path found
+			Point startPoint = foundPath.getStartPoint();
+			Point endPoint = foundPath.getEndPoint();
+
+			Point startScreen = board.gridToPixel(startPoint);
+			Point endScreen = board.gridToPixel(endPoint);
+
+			trySendText("Clicking path: " + foundPath);
+			moveAndClick(startScreen);
+			goodieRobot.delay(delayBetweenClicks);
+			moveAndClick(endScreen);
+
+			board.removeSpace(startPoint);
+			board.removeSpace(endPoint);
+
+			return true;
+		}
+		return false;
+	}
+
+	public int countRemaining() {
+		return board.getCountRemaining();
+	}
+
+	public void delayBetweenClicks() {
+		goodieRobot.delay(delayBetweenClicks);
 	}
 
 	public void detectIcons() {
@@ -150,57 +180,63 @@ public class GoodieAgent {
 		board.setGridLocations(squares);
 	}
 
-	public void processScreen() {
-		board.setImage(image);
+	public int getDelayBetweenClicks() {
+		return delayBetweenClicks;
 	}
 
-	public void setScreenRegion(Rectangle region) {
-		this.screenRegion = region;
+	public int getDelayMouseMove() {
+		return delayMouseMove;
+	}
+
+	public int getDelayUpDown() {
+		return delayUpDown;
 	}
 
 	public boolean isDone() {
 		return board.isEmpty();
 	}
 
-	public int countRemaining() {
-		return board.getCountRemaining();
-	}
-
-	/**
-	 * Attempts to click on a pair of matching icons. Returns whether this
-	 * action succeeded
-	 * 
-	 * @return
-	 */
-	public boolean clickOnMatch() {
-		GoodiePath foundPath = matchDetector.findPath();
-		if (foundPath != null) {
-			// there was a path found
-			Point startPoint = foundPath.getStartPoint();
-			Point endPoint = foundPath.getEndPoint();
-
-			Point startScreen = board.gridToPixel(startPoint);
-			Point endScreen = board.gridToPixel(endPoint);
-
-			trySendText("Clicking path: " + foundPath);
-			moveAndClick(startScreen);
-			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
-			moveAndClick(endScreen);
-
-			board.removeSpace(startPoint);
-			board.removeSpace(endPoint);
-			goodieRobot.delay(ROBOT_INTER_CLICK_DELAY);
-
-			return true;
-		}
-		return false;
-	}
-
 	private void moveAndClick(Point imageLocation) {
 		goodieRobot.mouseMove(screenRegion.x + imageLocation.x, screenRegion.y + imageLocation.y);
-		goodieRobot.delay(ROBOT_MOUSE_MOVE_DELAY);
+		goodieRobot.delay(delayMouseMove);
 		goodieRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		goodieRobot.delay(ROBOT_MOUSE_DOWN_UP_DELAY);
+		goodieRobot.delay(delayUpDown);
 		goodieRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+	}
+
+	public void processScreen() {
+		board.setImage(image);
+	}
+
+	public void setDebugStream(DebugStream stream) {
+		debugStream = stream;
+	}
+
+	public void setDelayBetweenClicks(int delayBetweenClicks) {
+		if (delayBetweenClicks >= 0) {
+			this.delayBetweenClicks = delayBetweenClicks;
+		}
+	}
+
+	public void setDelayMouseMove(int delayMouseMove) {
+		if (delayMouseMove >= 0) {
+			this.delayMouseMove = delayMouseMove;
+		}
+	}
+
+	public void setDelayUpDown(int delayUpDown) {
+		if (delayUpDown >= 0) {
+			this.delayUpDown = delayUpDown;
+		}
+	}
+
+	public void setScreenRegion(Rectangle region) {
+		this.screenRegion = region;
+	}
+
+	private void trySendText(String text) {
+		if (debugStream != null) {
+			debugStream.sendText(text);
+		}
 	}
 }
