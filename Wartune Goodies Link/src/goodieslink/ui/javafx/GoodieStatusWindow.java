@@ -1,10 +1,12 @@
 package goodieslink.ui.javafx;
 
 import java.awt.AWTException;
+import java.awt.BasicStroke;
 import java.awt.Rectangle;
 import java.io.File;
 
 import goodieslink.controller.GoodieAgent;
+import goodieslink.logging.ImageDecorator;
 import goodieslink.logging.ProgressLogger;
 import goodieslink.ui.javafx.console.DebugConsole;
 import javafx.application.Platform;
@@ -16,12 +18,14 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -122,11 +126,15 @@ public class GoodieStatusWindow extends Stage {
 
 	}
 
-	GoodieAgent agent;
-	ScreenRegionSelect regionSelector;
-	DebugConsole outputConsole;
-	Label countRemainingLabel;
-	ProgressLogger imageLogger;
+	private GoodieAgent agent;
+	private ScreenRegionSelect regionSelector;
+	private DebugConsole outputConsole;
+	private Label countRemainingLabel;
+	private ProgressLogger imageLogger;
+	private ImageDecorator decorator;
+
+	private float squareBorderWidth;
+	private float pathWidth;
 
 	Rectangle captureRegion;
 
@@ -137,6 +145,10 @@ public class GoodieStatusWindow extends Stage {
 		regionSelector = new ScreenRegionSelect();
 		outputConsole = new DebugConsole();
 		imageLogger = new ProgressLogger();
+		squareBorderWidth = 2;
+		pathWidth = 10;
+		decorator = new ImageDecorator(new BasicStroke(pathWidth), new java.awt.Color(228, 215, 0),
+				new BasicStroke(squareBorderWidth), new java.awt.Color(255, 0, 0));
 		create();
 		Platform.runLater(new Runnable() {
 			@Override
@@ -181,27 +193,27 @@ public class GoodieStatusWindow extends Stage {
 
 		Label instructionLabel = new Label("Resize the red rectangle around the game board");
 		instructionLabel.setWrapText(true);
-		gp.add(instructionLabel, 1, 1, 2, 1);
+		gp.add(instructionLabel, 0, 0, 2, 1);
 
 		Label instructionLabel2 = new Label(
 				"Then click this start button and the mouse will automatically click matching squares.");
 		instructionLabel2.setWrapText(true);
-		gp.add(instructionLabel2, 1, 2, 2, 1);
+		gp.add(instructionLabel2, 0, 1, 2, 1);
 
 		Label instructionLabel3 = new Label(
 				"Please don't have your web browser on full screen mode because depending on your platform this window will not stay on top of the browser.");
 		instructionLabel3.setWrapText(true);
-		gp.add(instructionLabel3, 1, 3, 2, 1);
+		gp.add(instructionLabel3, 0, 2, 2, 1);
 
 		Label instructionLabel4 = new Label("Press ESC to stop clicking.");
-		gp.add(instructionLabel4, 1, 4, 2, 1);
+		gp.add(instructionLabel4, 0, 3, 2, 1);
 
 		Button startButton = new Button("Start");
 		startButton.setOnAction(new StartButtonHandler());
-		gp.add(startButton, 1, 5, 1, 1);
+		gp.add(startButton, 0, 4, 1, 1);
 
 		countRemainingLabel = new Label();
-		gp.add(countRemainingLabel, 1, 6, 2, 1);
+		gp.add(countRemainingLabel, 0, 5, 2, 1);
 
 		CheckBox debugCheckBox = new CheckBox("Debug mode");
 		debugCheckBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -216,6 +228,9 @@ public class GoodieStatusWindow extends Stage {
 			}
 		});
 
+		GridPane imageDebugPanel = new GridPane();
+		imageDebugPanel.setDisable(true);
+
 		CheckBox saveImagesCheckBox = new CheckBox("Save path images");
 		saveImagesCheckBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
@@ -224,13 +239,57 @@ public class GoodieStatusWindow extends Stage {
 					DirectoryChooser folderChooser = new DirectoryChooser();
 					File chosenFolder = folderChooser.showDialog(null);
 					if (chosenFolder != null) {
-
+						imageLogger.setLogging(true);
+						imageLogger.setDirectory(chosenFolder);
+						imageDebugPanel.setDisable(false);
+					} else {
+						imageLogger.setLogging(false);
+						saveImagesCheckBox.setSelected(false);
+						imageDebugPanel.setDisable(true);
 					}
+				} else {
+					imageDebugPanel.setDisable(true);
 				}
 			}
 		});
 
-		gp.add(debugCheckBox, 1, 7, 2, 1);
+		java.awt.Color borderColor = decorator.getSquareBorderColor();
+		java.awt.Color pathColor = decorator.getPathColor();
+
+		ColorPicker squareColorPicker = new ColorPicker(
+				new Color((double) borderColor.getRed() / 255, (double) borderColor.getGreen() / 255,
+						(double) borderColor.getBlue() / 255, (double) borderColor.getAlpha() / 255));
+		ColorPicker pathColorPicker = new ColorPicker(
+				new Color((double) pathColor.getRed() / 255, (double) pathColor.getGreen() / 255,
+						(double) pathColor.getBlue() / 255, (double) pathColor.getAlpha() / 255));
+
+		squareColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
+			@Override
+			public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+				decorator.setSquareBorderColor(newValue);
+			}
+		});
+
+		pathColorPicker.valueProperty().addListener(new ChangeListener<Color>() {
+			@Override
+			public void changed(ObservableValue<? extends Color> observable, Color oldValue, Color newValue) {
+				decorator.setPathColor(newValue);
+			}
+		});
+
+		Label pathBorderLabel = new Label("Path border color:");
+		pathBorderLabel.setWrapText(true);
+		Label squareBorderLabel = new Label("Square border color:");
+		squareBorderLabel.setWrapText(true);
+
+		imageDebugPanel.add(pathBorderLabel, 0, 0);
+		imageDebugPanel.add(squareColorPicker, 1, 0);
+		imageDebugPanel.add(squareBorderLabel, 0, 1);
+		imageDebugPanel.add(pathColorPicker, 1, 1);
+
+		gp.add(debugCheckBox, 0, 6, 2, 1);
+		gp.add(saveImagesCheckBox, 0, 7, 2, 1);
+		gp.add(imageDebugPanel, 0, 8, 2, 1);
 
 		Label upDownDelayLabel = new Label("Delay between pressing and releasing mouse button (millisec.):");
 		upDownDelayLabel.setWrapText(true);
@@ -243,8 +302,8 @@ public class GoodieStatusWindow extends Stage {
 				agent.setDelayUpDown(newValue);
 			}
 		});
-		gp.add(upDownDelayLabel, 1, 8, 1, 1);
-		gp.add(upDownDelaySpinner, 2, 9, 1, 1);
+		gp.add(upDownDelayLabel, 0, 9, 1, 1);
+		gp.add(upDownDelaySpinner, 1, 10, 1, 1);
 
 		Label betweenClickDelayLabel = new Label("Delay between clicks (millisec):");
 		betweenClickDelayLabel.setWrapText(true);
@@ -257,8 +316,8 @@ public class GoodieStatusWindow extends Stage {
 				agent.setDelayBetweenClicks(newValue);
 			}
 		});
-		gp.add(betweenClickDelayLabel, 1, 10, 1, 1);
-		gp.add(betweenClickDelaySpinner, 2, 10, 1, 1);
+		gp.add(betweenClickDelayLabel, 0, 11, 1, 1);
+		gp.add(betweenClickDelaySpinner, 1, 12, 1, 1);
 
 		this.setScene(scene);
 

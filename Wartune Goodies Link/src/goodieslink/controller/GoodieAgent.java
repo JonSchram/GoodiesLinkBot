@@ -1,12 +1,14 @@
 package goodieslink.controller;
 
 import java.awt.AWTException;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.IOException;
 import java.util.List;
 
 import org.opencv.core.CvType;
@@ -15,6 +17,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import goodieslink.ImageDataUtils;
+import goodieslink.logging.ImageDecorator;
+import goodieslink.logging.ProgressLogger;
 import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.hough.GridFilter;
@@ -22,7 +26,6 @@ import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.javafx.console.DebugConsole.DebugStream;
-import goodieslink.ui.swing.ImagePreview;
 
 /**
  * 
@@ -55,6 +58,9 @@ public class GoodieAgent {
 	private int minSquareRadius;
 
 	private int maxSquareRadius;
+
+	private ImageDecorator decorator;
+	private ProgressLogger logger;
 
 	/**
 	 * Initializes a GoodieAgent to interact with the Goodies link game.
@@ -129,6 +135,19 @@ public class GoodieAgent {
 			Point startScreen = board.gridToPixel(startPoint);
 			Point endScreen = board.gridToPixel(endPoint);
 
+			if (logger != null && logger.isLogging() && decorator != null) {
+				BufferedImage decoratedImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+				Graphics g = decoratedImage.getGraphics();
+				g.drawImage(image, 0, 0, null);
+				g.dispose();
+				decorator.decorate(this.image, board.getSquareGrid(), foundPath);
+				try {
+					logger.logImage(decoratedImage);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
 			trySendText("Clicking path: " + foundPath);
 			moveAndClick(startScreen);
 			goodieRobot.delay(delayBetweenClicks);
@@ -178,9 +197,35 @@ public class GoodieAgent {
 		squareDetector = new SquareTransform(edgeImage, minSquareRadius, maxSquareRadius);
 		squareDetector.process();
 
+		if (logger != null) {
+			if (logger.isLogging()) {
+				// use a copy of the image
+				try {
+					logger.logImage(edgeImage);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 		int averageRadius = (minSquareRadius + maxSquareRadius) / 2;
 		List<Square> squares = squareDetector.getBoxes(squareDetectionThreshold,
 				new GridFilter(averageRadius, averageRadius));
+
+		if (logger != null && logger.isLogging() && decorator != null) {
+			try {
+				// use a copy of the image
+				BufferedImage decoratedImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+				Graphics g = decoratedImage.getGraphics();
+				decoratedImage.getGraphics();
+				g.drawImage(image, 0, 0, null);
+				g.dispose();
+				decorator.decorate(decoratedImage, squares, null);
+				logger.logImage(decoratedImage);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		board.setImageQuiet(image);
 		board.setGridLocations(squares);
@@ -216,6 +261,14 @@ public class GoodieAgent {
 
 	public void setDebugStream(DebugStream stream) {
 		debugStream = stream;
+	}
+
+	public void setLogger(ProgressLogger logger) {
+		this.logger = logger;
+	}
+
+	public void setDecorator(ImageDecorator decorator) {
+		this.decorator = decorator;
 	}
 
 	public void setDelayBetweenClicks(int delayBetweenClicks) {

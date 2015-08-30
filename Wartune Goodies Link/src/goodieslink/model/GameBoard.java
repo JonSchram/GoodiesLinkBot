@@ -524,6 +524,10 @@ public class GameBoard {
 		return -1;
 	}
 
+	public Square[][] getSquareGrid() {
+		return squareLocations;
+	}
+
 	/**
 	 * Computes the location of the pixel at the center of the location on the
 	 * grid.

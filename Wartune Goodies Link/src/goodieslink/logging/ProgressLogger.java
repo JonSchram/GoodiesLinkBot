@@ -9,9 +9,19 @@ import javax.imageio.ImageIO;
 public class ProgressLogger {
 	private File saveDirectory;
 	private int count;
+	private boolean logging;
 
 	public ProgressLogger() {
 		count = 0;
+		logging = false;
+	}
+
+	public void setLogging(boolean log) {
+		logging = log;
+	}
+
+	public boolean isLogging() {
+		return logging;
 	}
 
 	/**
