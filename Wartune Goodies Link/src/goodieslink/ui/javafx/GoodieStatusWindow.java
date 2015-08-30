@@ -2,8 +2,10 @@ package goodieslink.ui.javafx;
 
 import java.awt.AWTException;
 import java.awt.Rectangle;
+import java.io.File;
 
 import goodieslink.controller.GoodieAgent;
+import goodieslink.logging.ProgressLogger;
 import goodieslink.ui.javafx.console.DebugConsole;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -20,6 +22,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -123,6 +126,7 @@ public class GoodieStatusWindow extends Stage {
 	ScreenRegionSelect regionSelector;
 	DebugConsole outputConsole;
 	Label countRemainingLabel;
+	ProgressLogger imageLogger;
 
 	Rectangle captureRegion;
 
@@ -132,6 +136,7 @@ public class GoodieStatusWindow extends Stage {
 		stopOperation = false;
 		regionSelector = new ScreenRegionSelect();
 		outputConsole = new DebugConsole();
+		imageLogger = new ProgressLogger();
 		create();
 		Platform.runLater(new Runnable() {
 			@Override
@@ -161,7 +166,9 @@ public class GoodieStatusWindow extends Stage {
 		gp.setPadding(new Insets(5));
 		Scene scene = new Scene(gp);
 
-		agent = new GoodieAgent(0.85, 19, 23, 20, 4, 10);
+		// lowered threshold so that if part of a square is missing it will
+		// still be found
+		agent = new GoodieAgent(0.80, 19, 23, 20, 4, 10);
 		agent.setDebugStream(outputConsole.getDebugStream());
 		scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
 			@Override
@@ -208,6 +215,21 @@ public class GoodieStatusWindow extends Stage {
 				}
 			}
 		});
+
+		CheckBox saveImagesCheckBox = new CheckBox("Save path images");
+		saveImagesCheckBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (saveImagesCheckBox.isSelected()) {
+					DirectoryChooser folderChooser = new DirectoryChooser();
+					File chosenFolder = folderChooser.showDialog(null);
+					if (chosenFolder != null) {
+
+					}
+				}
+			}
+		});
+
 		gp.add(debugCheckBox, 1, 7, 2, 1);
 
 		Label upDownDelayLabel = new Label("Delay between pressing and releasing mouse button (millisec.):");

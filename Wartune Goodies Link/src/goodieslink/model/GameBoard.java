@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +21,7 @@ import goodieslink.processing.Square;
 import goodieslink.processing.matching.DifferenceSquaredMeasure;
 import goodieslink.processing.matching.RegionMatcher;
 import goodieslink.processing.matching.SimilarityResult;
+import goodieslink.ui.swing.SquareOverlay;
 
 /**
  * Converts square pixel location to locations on a rectangular grid, and stores
@@ -270,21 +272,28 @@ public class GameBoard {
 			// double minRowSpacing = findMinSpacing(cols);
 			averageRowSpacing = findAverageSpacing(cols);
 
-			// only have to search rows for min because both rows and cols
-			// contain
-			// all squares
-			gridUpperLeft = findMin(rows);
-			gridLowerRight = findMax(rows);
-			gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
-			gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
+			if (averageColumnSpacing != -1 && averageRowSpacing != -1) {
 
-			iconIds = new int[gridHeight][gridWidth];
-			squareLocations = new Square[gridHeight][gridWidth];
+				// only have to search rows for min because both rows and cols
+				// contain
+				// all squares
+				gridUpperLeft = findMin(rows);
+				gridLowerRight = findMax(rows);
+				gridWidth = 1 + (int) Math.round((gridLowerRight.getX() - gridUpperLeft.getX()) / averageColumnSpacing);
+				gridHeight = 1 + (int) Math.round((gridLowerRight.getY() - gridUpperLeft.getY()) / averageRowSpacing);
 
-			for (Square s : gridLocations) {
-				int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
-				int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
-				squareLocations[rowNum][colNum] = s;
+				iconIds = new int[gridHeight][gridWidth];
+				squareLocations = new Square[gridHeight][gridWidth];
+
+				for (Square s : gridLocations) {
+					int rowNum = (int) Math.round((s.getCenterY() - gridUpperLeft.getY()) / averageRowSpacing);
+					int colNum = (int) Math.round((s.getCenterX() - gridUpperLeft.getX()) / averageColumnSpacing);
+					squareLocations[rowNum][colNum] = s;
+				}
+			} else {
+				// not enough squares to establish a grid, no average spacing
+				// found
+				throw new NoSuchElementException("Not enough squares, conversion to grid failed.");
 			}
 		} else {
 			throw new NullPointerException("No squares, can't convert to grid");
@@ -308,8 +317,23 @@ public class GameBoard {
 				SquareGrouping group = groupIterator.next();
 				double averageSpace = group.averageMinSpacing();
 				if (averageSpace != -1) {
-					count++;
-					spaceSum += averageSpace;
+					if (count != 0) {
+						if (Math.round(averageSpace * count / spaceSum) == 1) {
+							// gaps are similar enough that this is the true
+							// minimum spacing
+							count++;
+							spaceSum += averageSpace;
+						} else if (Math.round(spaceSum / (count * averageSpace)) > 1) {
+							// running average divided by current average is
+							// big, current average is true one
+							count = 1;
+							spaceSum = averageSpace;
+						}
+						// discards spacings that are too different
+					} else {
+						count = 1;
+						spaceSum = averageSpace;
+					}
 				}
 			}
 			if (count != 0) {

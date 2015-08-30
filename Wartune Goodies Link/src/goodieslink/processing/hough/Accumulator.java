@@ -111,11 +111,18 @@ public class Accumulator {
 	 */
 	public List<Square> getPeaks(double borderProportion) {
 		ArrayList<Square> peaks = new ArrayList<Square>();
+		int[] borderPixelCache = new int[maxRadius - minRadius + 1];
+		for (int r = 0; r < maxRadius - minRadius + 1; r++) {
+			// fast multiply by 8
+			borderPixelCache[r] = (r + minRadius) << 3;
+		}
 		for (int w = 0; w < width; w++) {
 			for (int h = 0; h < height; h++) {
 				for (int r = 0; r < maxRadius - minRadius + 1; r++) {
 					// calculate # of pixels in the border
-					int borderPixels = 8 * (r + minRadius);
+					// should probably be stored in an array
+					// int borderPixels = 8 * (r + minRadius);
+					int borderPixels = borderPixelCache[r];
 					if (bins[w][h][r] / (double) borderPixels >= borderProportion) {
 						// for now accept all peaks and don't attempt to
 						// consolidate nearby ones

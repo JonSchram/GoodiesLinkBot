@@ -77,6 +77,10 @@ public class RegionMatcher {
 		initialized = true;
 	}
 
+	public BufferedImage getImage() {
+		return image;
+	}
+
 	/**
 	 * Best score for the similarity between two regions, shifting square 1
 	 * within the limit specified when the RegionMatcher was created. The lower

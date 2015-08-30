@@ -287,6 +287,24 @@ public class GoodiePath implements Iterable<Point> {
 	}
 
 	/**
+	 * Returns corner1
+	 * 
+	 * @return
+	 */
+	public Point getCorner1() {
+		return corner1;
+	}
+
+	/**
+	 * Returns corner2
+	 * 
+	 * @return
+	 */
+	public Point getCorner2() {
+		return corner2;
+	}
+
+	/**
 	 * Sets corner 2. Will not be set if the corner equals the end point or
 	 * corner1
 	 * 

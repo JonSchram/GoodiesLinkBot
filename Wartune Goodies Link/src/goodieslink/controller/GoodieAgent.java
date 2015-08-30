@@ -22,6 +22,7 @@ import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.javafx.console.DebugConsole.DebugStream;
+import goodieslink.ui.swing.ImagePreview;
 
 /**
  * 
