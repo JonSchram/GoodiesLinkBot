@@ -127,22 +127,30 @@ public class ColumnGroup extends SquareGrouping {
 				spacings.add(spacing);
 				previous = current;
 			}
-			double minSpace = Collections.min(spacings);
-			int count = 0;
-			int spaceSum = 0;
-			final double maxError = .1;
-			for (double space : spacings) {
-				// % difference formula
-				if (2 * (space - minSpace) / (space + minSpace) < maxError) {
-					// spacing is determined to be within acceptable error range
-					spaceSum += space;
-					count++;
+			// threw exception here, the set was empty
+			// should return -1 to say there is no min
+			if (spacings.size() > 0) {
+				double minSpace = Collections.min(spacings);
+				int count = 0;
+				int spaceSum = 0;
+				final double maxError = .1;
+				for (double space : spacings) {
+					// % difference formula
+					if (2 * (space - minSpace) / (space + minSpace) < maxError) {
+						// spacing is determined to be within acceptable error
+						// range
+						spaceSum += space;
+						count++;
+					}
 				}
-			}
 
-			if (count != 0) {
-				return spaceSum / count;
+				if (count != 0) {
+					return spaceSum / count;
+				} else {
+					return -1;
+				}
 			} else {
+				// set is empty
 				return -1;
 			}
 		} else {

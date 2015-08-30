@@ -22,7 +22,7 @@ public class ImagePreview {
 		mainWindow.setLayout(new BorderLayout());
 		mainWindow.add(imagePanel, BorderLayout.CENTER);
 		mainWindow.setSize(400, 400);
-		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JFrame.setDefaultLookAndFeelDecorated(false);
 	}
 

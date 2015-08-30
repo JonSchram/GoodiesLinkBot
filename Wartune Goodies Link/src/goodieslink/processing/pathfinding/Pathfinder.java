@@ -42,7 +42,6 @@ public class Pathfinder {
 	 */
 	public GoodiePath findPath() {
 		GoodiePath path = new GoodiePath();
-
 		Dimension boardSize = board.getSize();
 
 		// whether two matching spaces have been found;
@@ -187,7 +186,7 @@ public class Pathfinder {
 		while (pathPoints.hasNext() && !hasCollision) {
 			Point p = pathPoints.next();
 			// ignore points off the board
-			if (p.x >= 0 && p.x <= size.width && p.y >= 0 && p.y <= size.height) {
+			if (p.x >= 0 && p.x < size.width && p.y >= 0 && p.y < size.height) {
 				if (board.getSquareId(p.y, p.x) != 0) {
 					if (pathPoints.hasNext()) {
 						// runs into a square that isn't the final one

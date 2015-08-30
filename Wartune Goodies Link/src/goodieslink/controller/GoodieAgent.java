@@ -22,6 +22,7 @@ import goodieslink.processing.hough.SquareTransform;
 import goodieslink.processing.pathfinding.GoodiePath;
 import goodieslink.processing.pathfinding.Pathfinder;
 import goodieslink.ui.javafx.console.DebugConsole.DebugStream;
+import goodieslink.ui.swing.ImagePreview;
 
 /**
  * 
@@ -113,6 +114,8 @@ public class GoodieAgent {
 		BufferedImage convertedImage = new BufferedImage(boardImage.getWidth(), boardImage.getHeight(),
 				BufferedImage.TYPE_3BYTE_BGR);
 		convertedImage.getGraphics().drawImage(boardImage, 0, 0, null);
+		// ImagePreview ip = new ImagePreview(convertedImage);
+		// ip.show();
 		this.image = convertedImage;
 	}
 
