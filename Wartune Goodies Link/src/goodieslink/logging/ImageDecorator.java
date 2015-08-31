@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import goodieslink.model.GameBoard;
 import goodieslink.processing.Square;
 import goodieslink.processing.pathfinding.GoodiePath;
 
@@ -75,7 +76,7 @@ public class ImageDecorator {
 	 * @param squares
 	 * @param path
 	 */
-	public void decorate(BufferedImage image, Square[][] squares, GoodiePath path) {
+	public void decorate(BufferedImage image, Square[][] squares, GoodiePath path, GameBoard b) {
 		Graphics2D g2 = (Graphics2D) image.getGraphics();
 		// draw border on squares
 		if (squares != null) {
@@ -84,12 +85,12 @@ public class ImageDecorator {
 
 		// draw found path
 		if (path != null) {
-			drawPath(g2, path);
+			drawPath(g2, path, b);
 		}
 		g2.dispose();
 	}
 
-	public void decorate(BufferedImage image, List<Square> squares, GoodiePath path) {
+	public void decorate(BufferedImage image, List<Square> squares, GoodiePath path, GameBoard b) {
 		Graphics2D g2 = (Graphics2D) image.getGraphics();
 		// draw border on squares
 		if (squares != null) {
@@ -98,7 +99,7 @@ public class ImageDecorator {
 
 		// draw found path
 		if (path != null) {
-			drawPath(g2, path);
+			drawPath(g2, path, b);
 		}
 		g2.dispose();
 	}
@@ -124,7 +125,7 @@ public class ImageDecorator {
 		}
 	}
 
-	private void drawPath(Graphics2D g2, GoodiePath path) {
+	private void drawPath(Graphics2D g2, GoodiePath path, GameBoard b) {
 		g2.setStroke(pathStroke);
 		g2.setColor(pathColor);
 
@@ -141,9 +142,9 @@ public class ImageDecorator {
 		pathPoints.add(path.getEndPoint());
 
 		Iterator<Point> pointIterator = pathPoints.iterator();
-		Point prevPoint = pointIterator.next();
+		Point prevPoint = b.gridToPixel(pointIterator.next());
 		while (pointIterator.hasNext()) {
-			Point currentPoint = pointIterator.next();
+			Point currentPoint = b.gridToPixel(pointIterator.next());
 			g2.drawLine(prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y);
 		}
 	}

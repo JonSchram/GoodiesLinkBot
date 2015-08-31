@@ -21,7 +21,6 @@ import goodieslink.processing.Square;
 import goodieslink.processing.matching.DifferenceSquaredMeasure;
 import goodieslink.processing.matching.RegionMatcher;
 import goodieslink.processing.matching.SimilarityResult;
-import goodieslink.ui.swing.SquareOverlay;
 
 /**
  * Converts square pixel location to locations on a rectangular grid, and stores

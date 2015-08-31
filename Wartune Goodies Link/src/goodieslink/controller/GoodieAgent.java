@@ -140,7 +140,7 @@ public class GoodieAgent {
 				Graphics g = decoratedImage.getGraphics();
 				g.drawImage(image, 0, 0, null);
 				g.dispose();
-				decorator.decorate(this.image, board.getSquareGrid(), foundPath);
+				decorator.decorate(decoratedImage, board.getSquareGrid(), foundPath, board);
 				try {
 					logger.logImage(decoratedImage);
 				} catch (IOException e) {
@@ -220,7 +220,7 @@ public class GoodieAgent {
 				decoratedImage.getGraphics();
 				g.drawImage(image, 0, 0, null);
 				g.dispose();
-				decorator.decorate(decoratedImage, squares, null);
+				decorator.decorate(decoratedImage, squares, null, null);
 				logger.logImage(decoratedImage);
 			} catch (IOException e) {
 				e.printStackTrace();

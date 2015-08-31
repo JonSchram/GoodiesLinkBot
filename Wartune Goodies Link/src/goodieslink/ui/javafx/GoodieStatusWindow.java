@@ -152,7 +152,8 @@ public class GoodieStatusWindow extends Stage {
 
 		// lowered threshold so that if part of a square is missing it will
 		// still be found
-		agent = new GoodieAgent(0.80, 19, 23, 20, 4, 10);
+		// raised it a little
+		agent = new GoodieAgent(0.83, 19, 23, 20, 4, 10);
 		agent.setDebugStream(outputConsole.getDebugStream());
 		agent.setLogger(imageLogger);
 		agent.setDecorator(decorator);
