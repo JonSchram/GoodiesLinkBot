@@ -39,7 +39,7 @@ public class GoodieAgent {
 
 	private int delayBetweenClicks = 100;
 	private int delayUpDown = 100;
-	private int delayMouseMove = 50;
+	private int delayMouseMove = 200;
 
 	private BufferedImage image;
 

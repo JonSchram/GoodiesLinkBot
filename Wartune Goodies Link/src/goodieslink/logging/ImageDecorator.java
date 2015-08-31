@@ -146,6 +146,7 @@ public class ImageDecorator {
 		while (pointIterator.hasNext()) {
 			Point currentPoint = b.gridToPixel(pointIterator.next());
 			g2.drawLine(prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y);
+			prevPoint = currentPoint;
 		}
 	}
 }
