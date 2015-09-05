@@ -149,8 +149,13 @@ public class GoodieAgent {
 			}
 
 			trySendText("Clicking path: " + foundPath);
+			// try clicking twice to ensure clicks are sent
+			moveAndClick(startScreen);
+			goodieRobot.delay(delayUpDown);
 			moveAndClick(startScreen);
 			goodieRobot.delay(delayBetweenClicks);
+			moveAndClick(endScreen);
+			goodieRobot.delay(delayUpDown);
 			moveAndClick(endScreen);
 
 			board.removeSpace(startPoint);

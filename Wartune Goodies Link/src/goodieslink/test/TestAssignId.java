@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opencv.core.Core;
@@ -39,7 +40,32 @@ public class TestAssignId {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		// nu.pattern.OpenCV.loadShared();
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		// System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		String libraryRootRelative = "lib/native";
+		String libraryRootAbsolute = new File(libraryRootRelative).getAbsolutePath();
+		int bits = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+		String os = System.getProperty("os.name");
+		System.out.println(bits + ", " + os);
+		System.out.println(SystemUtils.OS_ARCH);
+
+		if (SystemUtils.IS_OS_LINUX) {
+			if (bits == 64) {
+				// only have x64 version for Linux
+				System.out.println("Loading " + libraryRootAbsolute + "/linux64/libopencv_java2410.so");
+				System.load(libraryRootAbsolute + "/linux64/libopencv_java2410.so");
+			}
+		} else if (SystemUtils.IS_OS_WINDOWS) {
+			if (bits == 64) {
+				System.out.println("Loading " + libraryRootAbsolute + "/windows64/opencv_java2410.dll");
+				System.load(libraryRootAbsolute + "/windows64/opencv_java2410.dll");
+			} else {
+				System.out.println("Loading " + libraryRootAbsolute + "/windows32/opencv_java2410.dll");
+				System.load(libraryRootAbsolute + "/windows32/opencv_java2410.dll");
+			}
+		} else if (SystemUtils.IS_OS_MAC) {
+			// have no mac library
+		}
+		System.out.println("Done loading library");
 	}
 
 	@Test
