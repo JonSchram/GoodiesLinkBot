@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;

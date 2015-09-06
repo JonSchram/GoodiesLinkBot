@@ -150,13 +150,19 @@ public class GoodieAgent {
 
 			trySendText("Clicking path: " + foundPath);
 			// try clicking twice to ensure clicks are sent
-			moveAndClick(startScreen);
+			// moveAndClick(startScreen);
+			moveMouse(startScreen);
+			mouseClick();
 			goodieRobot.delay(delayUpDown);
-			moveAndClick(startScreen);
+			mouseClick();
+
 			goodieRobot.delay(delayBetweenClicks);
-			moveAndClick(endScreen);
+
+			// moveAndClick(endScreen);
+			moveMouse(endScreen);
+			mouseClick();
 			goodieRobot.delay(delayUpDown);
-			moveAndClick(endScreen);
+			mouseClick();
 
 			board.removeSpace(startPoint);
 			board.removeSpace(endPoint);
@@ -252,13 +258,25 @@ public class GoodieAgent {
 		return board.isEmpty();
 	}
 
-	private void moveAndClick(Point imageLocation) {
-		goodieRobot.mouseMove(screenRegion.x + imageLocation.x, screenRegion.y + imageLocation.y);
+	private void moveMouse(Point location) {
+		goodieRobot.mouseMove(screenRegion.x + location.x, screenRegion.y + location.y);
 		goodieRobot.delay(delayMouseMove);
+	}
+
+	private void mouseClick() {
 		goodieRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 		goodieRobot.delay(delayUpDown);
 		goodieRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
+
+	// private void moveAndClick(Point imageLocation) {
+	// goodieRobot.mouseMove(screenRegion.x + imageLocation.x, screenRegion.y +
+	// imageLocation.y);
+	// goodieRobot.delay(delayMouseMove);
+	// goodieRobot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+	// goodieRobot.delay(delayUpDown);
+	// goodieRobot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+	// }
 
 	public void processScreen() {
 		board.setImage(image);

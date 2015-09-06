@@ -15,6 +15,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -182,6 +183,7 @@ public class GoodieStatusWindow extends Stage {
 		setTitle("The Goodie Linker");
 
 		GridPane gp = new GridPane();
+		gp.setAlignment(Pos.BASELINE_CENTER);
 		gp.setVgap(3);
 		gp.setPadding(new Insets(5));
 		Scene scene = new Scene(gp);
@@ -319,7 +321,7 @@ public class GoodieStatusWindow extends Stage {
 			}
 		});
 		gp.add(upDownDelayLabel, 0, 9, 1, 1);
-		gp.add(upDownDelaySpinner, 1, 10, 1, 1);
+		gp.add(upDownDelaySpinner, 1, 9, 1, 1);
 
 		Label betweenClickDelayLabel = new Label("Delay between clicks (millisec):");
 		betweenClickDelayLabel.setWrapText(true);
@@ -332,8 +334,22 @@ public class GoodieStatusWindow extends Stage {
 				agent.setDelayBetweenClicks(newValue);
 			}
 		});
-		gp.add(betweenClickDelayLabel, 0, 11, 1, 1);
-		gp.add(betweenClickDelaySpinner, 1, 12, 1, 1);
+		gp.add(betweenClickDelayLabel, 0, 10, 1, 1);
+		gp.add(betweenClickDelaySpinner, 1, 10, 1, 1);
+
+		Label moveDelayLabel = new Label("Delay after moving mouse (millisec):");
+		moveDelayLabel.setWrapText(true);
+		Spinner<Integer> moveDelaySpinner = new Spinner<>(10, 2000, agent.getDelayMouseMove());
+		moveDelaySpinner.setMinWidth(100);
+		moveDelaySpinner.setEditable(true);
+		moveDelaySpinner.valueProperty().addListener(new ChangeListener<Integer>() {
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				agent.setDelayMouseMove(newValue);
+			}
+		});
+		gp.add(moveDelayLabel, 0, 11, 1, 1);
+		gp.add(moveDelaySpinner, 1, 11, 1, 1);
 
 		this.setScene(scene);
 
