@@ -318,6 +318,7 @@ public class GoodieStatusWindow extends Stage {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
 				agent.setDelayUpDown(newValue);
+				outputConsole.getDebugStream().sendText("Delay between press and release set to " + newValue + " ms");
 			}
 		});
 		gp.add(upDownDelayLabel, 0, 9, 1, 1);
@@ -332,6 +333,7 @@ public class GoodieStatusWindow extends Stage {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
 				agent.setDelayBetweenClicks(newValue);
+				outputConsole.getDebugStream().sendText("Delay between clicks set to " + newValue + " ms");
 			}
 		});
 		gp.add(betweenClickDelayLabel, 0, 10, 1, 1);
@@ -346,6 +348,7 @@ public class GoodieStatusWindow extends Stage {
 			@Override
 			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
 				agent.setDelayMouseMove(newValue);
+				outputConsole.getDebugStream().sendText("Mouse move delay set to " + newValue + " ms");
 			}
 		});
 		gp.add(moveDelayLabel, 0, 11, 1, 1);
